@@ -84,8 +84,7 @@ export default function Router() {
     },
     {
       path: '/',
-      // element: <Navigate to="/dashboard/app" replace />,
-      element: <Navigate to="/dashboard/cashier/pos" replace />,
+      element: <Navigate to="/dashboard/app" replace />,
     },
     {
       path: '/dashboard',
