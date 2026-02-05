@@ -107,7 +107,7 @@ export default function Router() {
           path: 'tenant',
           element: (
             <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
-              <Dashboard />
+              <TenantList />
             </RoleBasedGuard>
           ),
         },
@@ -587,77 +587,6 @@ export default function Router() {
             },
           ],
         },
-        // bazaar
-        {
-          path: 'bazaar',
-          children: [
-            { element: <Navigate to="/dashboard/bazaar/stand" replace />, index: true },
-            {
-              path: 'stand',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarStand />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'stand/new',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarStandCreate />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'stand/:id/edit',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarStandEdit />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'master-voucher',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarVoucher />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'master-voucher/new',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarVoucherCreate />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'master-voucher/:id/edit',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarVoucherEdit />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'log',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarLog />
-                </RoleBasedGuard>
-              ),
-            },
-            {
-              path: 'voucher-log',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin', 'admin', 'Admin Bazaar', 'Staff Bazaar']}>
-                  <BazaarLogVoucher />
-                </RoleBasedGuard>
-              ),
-            },
-          ],
-        },
       ],
     },
     {
@@ -671,16 +600,6 @@ export default function Router() {
     { path: '*', element: <Navigate to="/404" replace /> },
   ]);
 }
-
-// Bazaar
-const BazaarStand = Loadable(lazy(() => import('../pages/bazaar/stand/BazaarStand')));
-const BazaarStandCreate = Loadable(lazy(() => import('../pages/bazaar/stand/BazaarStandCreate')));
-const BazaarStandEdit = Loadable(lazy(() => import('../pages/bazaar/stand/BazaarStandEdit')));
-const BazaarVoucher = Loadable(lazy(() => import('../pages/bazaar/voucher/BazaarVoucher')));
-const BazaarVoucherCreate = Loadable(lazy(() => import('../pages/bazaar/voucher/BazaarVoucherCreate')));
-const BazaarVoucherEdit = Loadable(lazy(() => import('../pages/bazaar/voucher/BazaarVoucherEdit')));
-const BazaarLog = Loadable(lazy(() => import('../pages/bazaar/log/BazaarLog')));
-const BazaarLogVoucher = Loadable(lazy(() => import('../pages/bazaar/log-voucher/BazaarLogVoucher')));
 
 // Gallery
 const GalleryCreate = Loadable(lazy(() => import('../pages/gallery/Gallery')));
@@ -705,29 +624,14 @@ const ResetPassword = Loadable(lazy(() => import('../pages/registerv2/screen_res
 const Dashboard = Loadable(lazy(() => import('../pages/dashboard/Dashboard')));
 const NotFound = Loadable(lazy(() => import('../pages/Page404')));
 
+// Tenant
+const TenantList = Loadable(lazy(() => import('../pages/tenant/TenantList')));
+
 // Customer
 const CustomerList = Loadable(lazy(() => import('../pages/customer/CustomerList')));
 const CustomerCreate = Loadable(lazy(() => import('../pages/customer/CustomerCreate')));
 const CustomerEdit = Loadable(lazy(() => import('../pages/customer/CustomerEdit')));
 const CustomerView = Loadable(lazy(() => import('../pages/customer/CustomerView')));
-
-// Member
-const MemberList = Loadable(lazy(() => import('../pages/member/list/MemberList')));
-const MemberCreate = Loadable(lazy(() => import('../pages/member/list/MemberCreate')));
-const MemberEdit = Loadable(lazy(() => import('../pages/member/list/MemberEdit')));
-const MemberView = Loadable(lazy(() => import('../pages/member/list/MemberView')));
-const MemberLogVoucher = Loadable(lazy(() => import('../pages/member/log-voucher/MemberLogVoucher')));
-const MemberPostcard = Loadable(lazy(() => import('../pages/member/postcard/MemberPostcard')));
-const MemberCard = Loadable(lazy(() => import('../pages/memberCard/memberCard')));
-
-// Track History
-const History = Loadable(lazy(() => import('../pages/history/HistoryView')));
-
-// Track History Order
-const HistoryOrder = Loadable(lazy(() => import('../pages/history/HistoryOrderView')));
-
-// Print Count
-const PrintCount = Loadable(lazy(() => import('../pages/print-count/PrintCount')));
 
 // Library
 const LibraryProduct = Loadable(lazy(() => import('../pages/library/product/LibraryProduct')));

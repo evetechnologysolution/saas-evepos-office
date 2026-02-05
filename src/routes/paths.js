@@ -23,6 +23,12 @@ export const PATH_AUTH = {
 export const PATH_DASHBOARD = {
   root: ROOTS_DASHBOARD,
   app: path(ROOTS_DASHBOARD, '/app'),
+  tenant: {
+    root: path(ROOTS_DASHBOARD, '/tenant'),
+    create: path(ROOTS_DASHBOARD, '/tenant/create'),
+    detail: (id) => path(ROOTS_DASHBOARD, `/tenant/${id}/detail`),
+    edit: (id) => path(ROOTS_DASHBOARD, `/tenant/${id}/edit`),
+  },
   progressScan: path(ROOTS_DASHBOARD, '/scan-progress'),
   voucherScan: path(ROOTS_DASHBOARD, '/scan-voucher'),
   cashier: {
