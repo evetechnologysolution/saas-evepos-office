@@ -104,6 +104,18 @@ export default function Router() {
           ),
         },
         {
+          path: 'plan',
+          element: <PlanList />,
+        },
+        {
+          path: 'plan/new',
+          element: <PlanCreate />,
+        },
+        {
+          path: 'plan/:id/edit',
+          element: <PlanEdit />,
+        },
+        {
           path: 'tenant',
           element: (
             <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
@@ -793,3 +805,8 @@ const VoucherScan = Loadable(lazy(() => import('../pages/scanVoucher')));
 
 // Chat
 const ChatPage = Loadable(lazy(() => import('../pages/chat/Chat')));
+
+// Plan
+const PlanList = Loadable(lazy(() => import('../pages/plan/Plan')));
+const PlanCreate = Loadable(lazy(() => import('../pages/plan/PlanCreate')));
+const PlanEdit = Loadable(lazy(() => import('../pages/plan/PlanEdit')));

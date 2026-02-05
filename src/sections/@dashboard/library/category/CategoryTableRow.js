@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 // @mui
-import { styled, Stack, TableRow, TableCell, Button } from '@mui/material';
+import { styled, Stack, TableRow, TableCell, Button, Typography } from '@mui/material';
 
+import numberWithCommas from 'src/utils/numberWithCommas';
 import Iconify from '../../../../components/Iconify';
 
 import { formatDate2 } from '../../../../utils/getData';
@@ -22,7 +23,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 }));
 
 export default function CategoryTableRow({ row, onEditRow, onDeleteRow }) {
-  const { createdAt, name, listNumber } = row;
+  const { createdAt, name, price, discount, description } = row;
 
   return (
     <CustomTableRow hover>
@@ -30,7 +31,25 @@ export default function CategoryTableRow({ row, onEditRow, onDeleteRow }) {
 
       <TableCell>{name}</TableCell>
 
-      <TableCell align="center">{listNumber}</TableCell>
+      <TableCell align="start">
+        <Typography variant="body2" fontWeight={800}>
+          Rp {numberWithCommas(price.yearly)}/Year
+        </Typography>
+        <Typography variant="body2" fontWeight={400}>
+          Rp {numberWithCommas(price.monthly)}/Month
+        </Typography>
+      </TableCell>
+
+      <TableCell align="start">
+        <Typography variant="body2" fontWeight={800}>
+          Rp {numberWithCommas(discount.yearly)}/Year
+        </Typography>
+        <Typography variant="body2" fontWeight={400}>
+          Rp {numberWithCommas(discount.monthly)}/Month
+        </Typography>
+      </TableCell>
+
+      <TableCell align="center">{description}</TableCell>
 
       <TableCell align="center">
         <Stack direction="row" justifyContent="center" gap={1}>
