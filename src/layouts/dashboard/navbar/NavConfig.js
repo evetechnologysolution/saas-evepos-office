@@ -48,6 +48,12 @@ export const useNavConfig = () => {
           icon: ICONS.user,
           roles: ['super admin', 'admin'],
         },
+        {
+          title: 'plan',
+          path: '/dashboard/plan',
+          icon: ICONS.setting,
+          roles: ['super admin', 'admin'],
+        },
       ],
     },
 
