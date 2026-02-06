@@ -21,7 +21,7 @@ import Iconify from '../../../components/Iconify';
 // hooks
 import useAuth from '../../../hooks/useAuth';
 // utils
-import { formatDate2 } from '../../../utils/getData';
+import { formatDate, formatDate2 } from '../../../utils/getData';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 
@@ -29,7 +29,7 @@ import { PATH_DASHBOARD } from '../../../routes/paths';
 
 TenantTableRow.propTypes = {
   row: PropTypes.object,
-  onEditRow: PropTypes.func,
+  onDetailRow: PropTypes.func,
   onDeleteRow: PropTypes.func,
 };
 
@@ -40,7 +40,7 @@ const CustomTableRow = styled(TableRow)(() => ({
   },
 }));
 
-export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
+export default function TenantTableRow({ row, onDetailRow, onDeleteRow }) {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -141,7 +141,7 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
         <Stack direction="column" alignItems="center" justifyContent="center">
           {subsRef?.serviceRef?.name || 'TRIAL'}
           <Typography variant="caption">
-            Expiry : {subsRef?.endDate ? formatDate2(subsRef?.endDate) : '-'}
+            Expiry : {subsRef?.endDate ? formatDate(subsRef?.endDate) : '-'}
           </Typography>
         </Stack>
       </TableCell>
@@ -165,11 +165,11 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
             <>
               <MenuItem
                 onClick={() => {
-                  // onEditRow();
+                  onDetailRow();
                   handleCloseAction();
                 }}
               >
-                <Iconify icon="eva:edit-outline" sx={{ width: 24, height: 24 }} />
+                <Iconify icon="fluent:apps-list-detail-24-regular" sx={{ width: 24, height: 24 }} />
                 Detail
               </MenuItem>
               <MenuItem
@@ -202,7 +202,7 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
             variant="contained"
             sx={{ p: 0, minWidth: 35, height: 35 }}
             onClick={() => {
-              onEditRow();
+              onDetailRow();
             }}
           >
             <Iconify icon="eva:edit-outline" sx={{ width: 24, height: 24 }} />

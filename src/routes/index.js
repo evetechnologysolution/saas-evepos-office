@@ -105,11 +105,24 @@ export default function Router() {
         },
         {
           path: 'tenant',
-          element: (
-            <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
-              <TenantList />
-            </RoleBasedGuard>
-          ),
+          children: [
+            {
+              path: '',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
+                  <TenantList />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/detail',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
+                  <TenantDetail />
+                </RoleBasedGuard>
+              ),
+            },
+          ],
         },
         {
           path: 'customer',
@@ -626,6 +639,7 @@ const NotFound = Loadable(lazy(() => import('../pages/Page404')));
 
 // Tenant
 const TenantList = Loadable(lazy(() => import('../pages/tenant/TenantList')));
+const TenantDetail = Loadable(lazy(() => import('../pages/tenant/TenantDetail')));
 
 // Customer
 const CustomerList = Loadable(lazy(() => import('../pages/customer/CustomerList')));

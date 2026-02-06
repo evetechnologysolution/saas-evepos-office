@@ -142,6 +142,10 @@ export default function TenantList() {
   const handleEditRow = (id) => {
     navigate(PATH_DASHBOARD.tenant.edit(paramCase(id)));
   };
+  
+  const handleDetailRow = (id) => {
+    navigate(PATH_DASHBOARD.tenant.detail(paramCase(id)));
+  };
 
   const handleDialog = (id) => {
     setSelectedId(id);
@@ -212,6 +216,7 @@ export default function TenantList() {
                             key={row._id}
                             row={row}
                             onEditRow={() => handleEditRow(row._id)}
+                            onDetailRow={() => handleDetailRow(row._id)}
                             onDeleteRow={() => handleDialog(row._id)}
                           />
                         ))}
@@ -230,7 +235,7 @@ export default function TenantList() {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={Number(tableData?.totalPages || 0)}
+                count={Number(tableData?.totalDocs || 0)}
                 rowsPerPage={controller.rowsPerPage}
                 page={controller.page}
                 onPageChange={handlePageChange}

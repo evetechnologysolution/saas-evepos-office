@@ -18,6 +18,17 @@ export default function useCall() {
       keepPreviousData: false,
     });
 
+  const listInvoice = (params) =>
+    useQuery({
+      queryKey: [...queryKey, params],
+      queryFn: async () => {
+        const qs = new URLSearchParams(params).toString();
+        const { data } = await axios.get(`/invoice?${qs}`);
+        return data;
+      },
+      keepPreviousData: false,
+    });
+
   const create = useMutation({
     mutationFn: async (payload) => {
       const { data } = await axios.post('/tenant', payload);
@@ -60,6 +71,7 @@ export default function useCall() {
 
   return {
     list,
+    listInvoice,
     getById,
     create,
     update,
