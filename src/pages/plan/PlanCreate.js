@@ -25,9 +25,39 @@ export default function LibraryCategoryCreate() {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
+  const defaultValues = {
+    name: '',
+    isActive: true,
+    price: {
+      monthly: 0,
+      yearly: 0,
+    },
+    discount: {
+      monthly: 0,
+      yearly: 0,
+    },
+    description: '',
+    modules: {
+      dashboard: false,
+      pos: false,
+      orders: false,
+      pickup: false,
+      scan_orders: false,
+      sales_report: false,
+      popular_product: false,
+      payment_overview: false,
+      category: false,
+      subcategory: false,
+      product: false,
+      variant: false,
+      promotion: false,
+      user: false,
+    },
+  };
+
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: schema.getDefault(),
+    defaultValues,
   });
 
   const {

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
-import { styled, Stack, TableRow, TableCell, Button, Typography } from '@mui/material';
+import { styled, Stack, TableRow, TableCell, Button, Typography, Chip } from '@mui/material';
 
 import numberWithCommas from 'src/utils/numberWithCommas';
 import Iconify from '../../../../components/Iconify';
@@ -23,13 +23,15 @@ const CustomTableRow = styled(TableRow)(() => ({
 }));
 
 export default function CategoryTableRow({ row, onEditRow, onDeleteRow }) {
-  const { createdAt, name, price, discount, description } = row;
+  const { createdAt, name, price, discount, description, isActive, totalSubscriptions } = row;
 
   return (
     <CustomTableRow hover>
       <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
-      <TableCell>{name}</TableCell>
+      <TableCell>
+        <Typography variant="body2">{name}</Typography>
+      </TableCell>
 
       <TableCell align="start">
         <Typography variant="body2" fontWeight={800}>
@@ -50,6 +52,8 @@ export default function CategoryTableRow({ row, onEditRow, onDeleteRow }) {
       </TableCell>
 
       <TableCell align="center">{description}</TableCell>
+      <TableCell align="center">{numberWithCommas(totalSubscriptions)}</TableCell>
+      <TableCell align="center">{isActive ? 'Active' : 'Inactive'}</TableCell>
 
       <TableCell align="center">
         <Stack direction="row" justifyContent="center" gap={1}>

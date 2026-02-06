@@ -3,7 +3,21 @@
 import PropTypes from 'prop-types';
 // @mui
 import { LoadingButton } from '@mui/lab';
-import { Card, Grid, Stack, Button, Typography, Divider } from '@mui/material';
+import {
+  Card,
+  Grid,
+  Stack,
+  Button,
+  Typography,
+  Divider,
+  TableCell,
+  TableRow,
+  TableBody,
+  TableHead,
+  Table,
+  TableContainer,
+  Paper,
+} from '@mui/material';
 // routes
 import { useNavigate } from 'react-router';
 import { FormProvider, RHFTextField, RHFSwitch, RHFNumberFormat } from '../../../components/hook-form';
@@ -16,6 +30,23 @@ PlanForm.propTypes = {
   type: PropTypes.string,
   isSubmitting: PropTypes.bool,
 };
+
+const MODULES = [
+  'dashboard',
+  'pos',
+  'orders',
+  'pickup',
+  'scan orders',
+  'sales report',
+  'popular product',
+  'payment overview',
+  'category',
+  'subcategory',
+  'product',
+  'variant',
+  'promotion',
+  'user',
+];
 
 export default function PlanForm({ methods, onSubmit, type, isSubmitting }) {
   const navigate = useNavigate();
@@ -100,6 +131,34 @@ export default function PlanForm({ methods, onSubmit, type, isSubmitting }) {
                   rows={3}
                   placeholder="Contoh: Cocok untuk individu atau UMKM dengan kebutuhan dasar."
                 />
+              </Stack>
+              <Stack spacing={1}>
+                <Typography variant="subtitle1">Akses Modul</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Tentukan modul apa saja yang bisa diakses oleh pengguna pada plan ini.
+                </Typography>
+
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Modul</TableCell>
+                        <TableCell align="center">Akses</TableCell>
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {MODULES.map((module) => (
+                        <TableRow key={module}>
+                          <TableCell sx={{ textTransform: 'capitalize' }}>{module}</TableCell>
+                          <TableCell align="center">
+                            <RHFSwitch name={`modules.${module.replace(/\s/g, '_')}`} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Stack>
             </Stack>
 

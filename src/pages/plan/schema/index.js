@@ -30,6 +30,23 @@ const planSchema = Yup.object({
   description: Yup.string().nullable(),
 
   isActive: Yup.boolean().required('Status aktif wajib diisi').default(true),
+
+  modules: Yup.object({
+    dashboard: Yup.boolean().default(false),
+    pos: Yup.boolean().default(false),
+    orders: Yup.boolean().default(false),
+    pickup: Yup.boolean().default(false),
+    scan_orders: Yup.boolean().default(false),
+    sales_report: Yup.boolean().default(false),
+    popular_product: Yup.boolean().default(false),
+    payment_overview: Yup.boolean().default(false),
+    category: Yup.boolean().default(false),
+    subcategory: Yup.boolean().default(false),
+    product: Yup.boolean().default(false),
+    variant: Yup.boolean().default(false),
+    promotion: Yup.boolean().default(false),
+    user: Yup.boolean().default(false),
+  }).required('Konfigurasi modul wajib diisi'),
 });
 
 export default planSchema;

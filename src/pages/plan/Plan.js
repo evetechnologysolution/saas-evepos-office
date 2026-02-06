@@ -41,6 +41,8 @@ const TABLE_HEAD = [
   { id: 'pricing', label: 'Pricing', align: 'center' },
   { id: 'discount', label: 'Discount', align: 'center' },
   { id: 'description', label: 'Description', align: 'center' },
+  { id: 'totalcustomer', label: 'Total Tenant', align: 'center' },
+  { id: 'status', label: 'Status', align: 'center' },
   { id: '', label: 'Action', align: 'center' },
 ];
 
