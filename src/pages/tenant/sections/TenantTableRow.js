@@ -11,6 +11,7 @@ import {
   TableRow,
   TableCell,
   Link,
+  Typography,
   MenuItem,
 } from '@mui/material';
 import { TableMoreMenu } from '../../../components/table';
@@ -136,7 +137,14 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
         </Label>
       </TableCell> */}
 
-      <TableCell align="center">{subsRef?.serviceRef?.name || '-'}</TableCell>
+      <TableCell align="center">
+        <Stack direction="column" alignItems="center" justifyContent="center">
+          {subsRef?.serviceRef?.name || 'TRIAL'}
+          <Typography variant="caption">
+            Expiry : {subsRef?.endDate ? formatDate2(subsRef?.endDate) : '-'}
+          </Typography>
+        </Stack>
+      </TableCell>
 
       <TableCell align="center">
         <Label
