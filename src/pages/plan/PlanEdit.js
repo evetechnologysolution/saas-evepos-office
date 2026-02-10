@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import { handleMutationFeedback } from 'src/utils/mutationfeedback';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { useQuery } from 'react-query';
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -17,6 +18,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import CategoryForm from './form/Form';
 import schema from './schema';
 import useCategory from './service/useCategory';
+import axios from '../../utils/axios';
 // ----------------------------------------------------------------------
 export default function LibraryCategoryCreate() {
   const { themeStretch } = useSettings();
@@ -26,6 +28,17 @@ export default function LibraryCategoryCreate() {
   const { id } = useParams();
 
   const { data: categoryById, isSuccess: isSuccessById, isLoading: loadingCategoryById } = getById(id);
+
+  const { data: auditData, isLoading: loadingAuditData } = useQuery({
+    queryKey: ['plan-history', id],
+    queryFn: async () => {
+      const res = await axios.get(`/audit/entity/Services/${id}`);
+      return res.data;
+    },
+  });
+
+  console.log(auditData);
+
   const defaultValues = {
     name: '',
     isActive: true,
@@ -103,6 +116,8 @@ export default function LibraryCategoryCreate() {
             methods={methods}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
+            auditData={auditData}
+            loadingAuditData={loadingAuditData}
           />
         )}
       </Container>
