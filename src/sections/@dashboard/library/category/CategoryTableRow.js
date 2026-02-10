@@ -28,6 +28,7 @@ export default function CategoryTableRow({ row, onEditRow, onDeleteRow }) {
   return (
     <CustomTableRow hover>
       <TableCell align="center">{formatDate2(createdAt)}</TableCell>
+      <TableCell>{row._id}</TableCell>
 
       <TableCell>
         <Typography variant="body2">{name}</Typography>
