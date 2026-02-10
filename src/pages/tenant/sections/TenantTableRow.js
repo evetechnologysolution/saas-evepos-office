@@ -31,6 +31,8 @@ TenantTableRow.propTypes = {
   row: PropTypes.object,
   onDetailRow: PropTypes.func,
   onDeleteRow: PropTypes.func,
+  onActivateRow: PropTypes.func,
+  onSuspendRow: PropTypes.func,
 };
 
 const CustomTableRow = styled(TableRow)(() => ({
@@ -40,7 +42,7 @@ const CustomTableRow = styled(TableRow)(() => ({
   },
 }));
 
-export default function TenantTableRow({ row, onDetailRow, onDeleteRow }) {
+export default function TenantTableRow({ row, onDetailRow, onDeleteRow, onActivateRow, onSuspendRow }) {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -140,9 +142,7 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow }) {
       <TableCell align="center">
         <Stack direction="column" alignItems="center" justifyContent="center">
           {subsRef?.serviceRef?.name || 'TRIAL'}
-          <Typography variant="caption">
-            Expiry : {subsRef?.endDate ? formatDate(subsRef?.endDate) : '-'}
-          </Typography>
+          <Typography variant="caption">Expiry : {subsRef?.endDate ? formatDate(subsRef?.endDate) : '-'}</Typography>
         </Stack>
       </TableCell>
 
@@ -173,13 +173,18 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow }) {
                 Detail
               </MenuItem>
               <MenuItem
-                sx={{ color: isActive(subsRef?.status) ? '#B78103' : '#229A16' }}
+                sx={{ color: isActive(status) ? '#B78103' : '#229A16' }}
                 onClick={() => {
+                  if (isActive(status)) {
+                    onSuspendRow();
+                  } else {
+                    onActivateRow();
+                  }
                   handleCloseAction();
                 }}
               >
                 <Iconify icon="typcn:warning-outline" sx={{ width: 24, height: 24 }} />
-                {isActive(subsRef?.status) ? 'Non-Aktifkan' : 'Aktifkan'}
+                {isActive(status) ? 'Non-Aktifkan' : 'Aktifkan'}
               </MenuItem>
               {/* {user?.role === 'super admin' && (
                 <MenuItem
@@ -196,29 +201,6 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow }) {
             </>
           }
         />
-        {/* <Stack direction="row" justifyContent="center" gap={1}>
-          <Button
-            title="Edit"
-            variant="contained"
-            sx={{ p: 0, minWidth: 35, height: 35 }}
-            onClick={() => {
-              onDetailRow();
-            }}
-          >
-            <Iconify icon="eva:edit-outline" sx={{ width: 24, height: 24 }} />
-          </Button>
-          <Button
-            title="Delete"
-            variant="contained"
-            color="error"
-            sx={{ p: 0, minWidth: 35, height: 35 }}
-            onClick={() => {
-              onDeleteRow();
-            }}
-          >
-            <Iconify icon="eva:trash-2-outline" sx={{ width: 24, height: 24 }} />
-          </Button>
-        </Stack> */}
       </TableCell>
     </CustomTableRow>
   );

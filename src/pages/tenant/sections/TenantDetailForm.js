@@ -20,6 +20,7 @@ import Label from '../../../components/Label';
 import { TableHeadCustom, TableNoData, TableLoading } from '../../../components/table';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 import TenantInvoiceTableRow from './TenantInvoiceTableRow';
+import TenantLogTableRow from './TenantLogTableRow';
 // utils
 import { formatDate, formatDate2 } from '../../../utils/getData';
 // service
@@ -37,19 +38,31 @@ const INVOICE_THEAD = [
   { id: 'amount', label: 'Total', align: 'center' },
 ];
 
+const LOG_THEAD = [
+  { id: 'createdAt', label: 'Created At', align: 'center' },
+  { id: 'log', label: 'Activity', align: 'left' },
+  { id: '', label: 'Updated By', align: 'center' },
+];
+
 // ----------------------------------------------------------------------
 
 export default function TenantDetail() {
   const navigate = useNavigate();
   const { id = '' } = useParams();
-  const { getById, listInvoice } = useService();
+  const { getById, listInvoice, listActivity } = useService();
   const { data: dataTenant, isLoading: loadingTenant } = getById(id);
 
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
     search: '',
-    role: '',
+    status: '',
+  });
+
+  const [ctrlLog, setCtrlLog] = useState({
+    page: 0,
+    rowsPerPage: 10,
+    search: '',
     status: '',
   });
 
@@ -57,6 +70,13 @@ export default function TenantDetail() {
     page: controller.page + 1,
     perPage: controller.rowsPerPage,
     search: controller.search,
+    tenant: id,
+  });
+
+  const { data: tableLog, isLoading: loadingLog } = listActivity({
+    page: ctrlLog.page + 1,
+    perPage: ctrlLog.rowsPerPage,
+    search: ctrlLog.search,
     tenant: id,
   });
 
@@ -70,6 +90,21 @@ export default function TenantDetail() {
   const handleChangeRowsPerPage = (event) => {
     setController({
       ...controller,
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
+  };
+
+  const handlePageChangeLog = (event, newPage) => {
+    setCtrlLog({
+      ...ctrlLog,
+      page: newPage,
+    });
+  };
+
+  const handleChangeRowsPerPageLog = (event) => {
+    setCtrlLog({
+      ...ctrlLog,
       rowsPerPage: parseInt(event.target.value, 10),
       page: 0,
     });
@@ -108,7 +143,7 @@ export default function TenantDetail() {
       <Stack>
         <Typography variant="subtitle2">{label}</Typography>
         {loadingTenant ? (
-          <Skeleton variant="text" width="100px" />
+          <Skeleton variant="text" width="100px" height="20px" />
         ) : (
           <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
             {value}
@@ -137,7 +172,7 @@ export default function TenantDetail() {
                 <Stack>
                   <Typography variant="subtitle2">Tenant ID</Typography>
                   {loadingTenant ? (
-                    <Skeleton variant="text" width="100px" />
+                    <Skeleton variant="text" width="100px" height="20px" />
                   ) : (
                     <Stack flexDirection="row" alignItems="center" gap={1}>
                       <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
@@ -230,15 +265,13 @@ export default function TenantDetail() {
                   label="Status Subscription"
                   value={
                     <>
-                      <div>
-                        <Label
-                          variant="ghost"
-                          color={subsColor(dataTenant?.subsRef?.status)}
-                          sx={{ textTransform: 'capitalize' }}
-                        >
-                          {dataTenant?.subsRef?.status}
-                        </Label>
-                      </div>
+                      <Label
+                        variant="ghost"
+                        color={subsColor(dataTenant?.subsRef?.status)}
+                        sx={{ textTransform: 'capitalize' }}
+                      >
+                        {dataTenant?.subsRef?.status}
+                      </Label>
                     </>
                   }
                 />
@@ -284,6 +317,48 @@ export default function TenantDetail() {
                 page={controller.page}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Box>
+          </Box>
+        </Stack>
+
+        <Stack sx={{ mt: 5 }}>
+          <Typography variant="subtitle1" color="primary">
+            Tenant Activity
+          </Typography>
+          <Divider sx={{ my: 1 }} />
+          <Box>
+            <Scrollbar>
+              <TableContainer sx={{ minWidth: 980, position: 'relative' }}>
+                <Table size="small">
+                  <TableHeadCustom headLabel={LOG_THEAD} rowCount={tableLog?.docs?.length} />
+
+                  <TableBody>
+                    {!loadingLog ? (
+                      <>
+                        {tableLog?.docs?.map((row) => (
+                          <TenantLogTableRow key={row._id} row={row} />
+                        ))}
+
+                        <TableNoData isNotFound={tableLog?.docs?.length === 0} />
+                      </>
+                    ) : (
+                      <TableLoading />
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Scrollbar>
+
+            <Box sx={{ position: 'relative' }}>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={Number(tableLog?.totalDocs || 0)}
+                rowsPerPage={ctrlLog.rowsPerPage}
+                page={ctrlLog.page}
+                onPageChange={handlePageChangeLog}
+                onRowsPerPageChange={handleChangeRowsPerPageLog}
               />
             </Box>
           </Box>
