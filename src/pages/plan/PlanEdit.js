@@ -37,35 +37,56 @@ export default function LibraryCategoryCreate() {
     },
   });
 
-  console.log(auditData);
+  const createModuleDefault = () => ({
+    enabled: false,
+    qty: 0,
+  });
 
   const defaultValues = {
     name: '',
     isActive: true,
+
     price: {
       monthly: 0,
       yearly: 0,
     },
+
+    selectedCustomer: {
+      allCustomer: false,
+      newCustomer: false,
+      oldCustomer: false,
+      autoRenewalCustomer: false,
+    },
+
     discount: {
       monthly: 0,
       yearly: 0,
     },
+
     description: '',
+
     modules: {
-      dashboard: false,
-      pos: false,
-      orders: false,
-      pickup: false,
-      scan_orders: false,
-      sales_report: false,
-      popular_product: false,
-      payment_overview: false,
-      category: false,
-      subcategory: false,
-      product: false,
-      variant: false,
-      promotion: false,
-      user: false,
+      dashboard: createModuleDefault(),
+      dashboardB: createModuleDefault(),
+      dashboardC: createModuleDefault(),
+      dashboardD: createModuleDefault(),
+      dashboardE: createModuleDefault(),
+      pos: createModuleDefault(),
+      orders: createModuleDefault(),
+      pickup: createModuleDefault(),
+      scan_orders: createModuleDefault(),
+
+      sales_report: createModuleDefault(),
+      popular_product: createModuleDefault(),
+      payment_overview: createModuleDefault(),
+
+      category: createModuleDefault(),
+      subcategory: createModuleDefault(),
+      product: createModuleDefault(),
+      variant: createModuleDefault(),
+      promotion: createModuleDefault(),
+
+      user: createModuleDefault(),
     },
   };
 

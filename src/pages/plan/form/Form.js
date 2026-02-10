@@ -26,8 +26,9 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router';
 import Iconify from 'src/components/Iconify';
 import { fDateTime } from 'src/utils/formatTime';
-import { FormProvider, RHFTextField, RHFSwitch, RHFNumberFormat } from '../../../components/hook-form';
+import { FormProvider, RHFTextField, RHFSwitch, RHFNumberFormat, RHFCheckbox } from '../../../components/hook-form';
 import renderChanges from '../../../utils/handleRenderAudit';
+import ModuleRow from './ModuleRow';
 
 // ----------------------------------------------------------------------
 
@@ -38,21 +39,29 @@ PlanForm.propTypes = {
   isSubmitting: PropTypes.bool,
 };
 
-const MODULES = [
-  'dashboard',
-  'pos',
-  'orders',
-  'pickup',
-  'scan orders',
-  'sales report',
-  'popular product',
-  'payment overview',
-  'category',
-  'subcategory',
-  'product',
-  'variant',
-  'promotion',
-  'user',
+export const MODULES = [
+  { key: 'dashboard', label: 'Dashboard — Revenue, Donation, Sales card' },
+  { key: 'dashboardB', label: 'Dashboard — Daily Sales' },
+  { key: 'dashboardC', label: 'Dashboard — Payment Method' },
+  { key: 'dashboardD', label: 'Dashboard — Popular Product' },
+  { key: 'dashboardE', label: 'Dashboard — Sales Report' },
+
+  { key: 'pos', label: 'POS' },
+  { key: 'orders', label: 'Orders' },
+  { key: 'pickup', label: 'Pickup' },
+  { key: 'scan_orders', label: 'Scan Orders' },
+
+  { key: 'sales_report', label: 'Sales Report' },
+  { key: 'popular_product', label: 'Popular Product' },
+  { key: 'payment_overview', label: 'Payment Overview' },
+
+  { key: 'category', label: 'Category' },
+  { key: 'subcategory', label: 'Subcategory' },
+  { key: 'product', label: 'Product' },
+  { key: 'variant', label: 'Variant' },
+  { key: 'promotion', label: 'Promotion' },
+
+  { key: 'user', label: 'User' },
 ];
 
 // Helper function untuk format label
@@ -253,7 +262,7 @@ const ChangeItem = ({ log, theme }) => {
   );
 };
 
-export default function PlanForm({ methods, onSubmit, type, isSubmitting, auditData = [], loadingAuditData = false }) {
+export default function PlanForm({ methods, onSubmit, type, isSubmitting, auditData = [] }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const button_label = type === 'create' ? 'Simpan Data' : 'Simpan Perubahan';
@@ -323,6 +332,21 @@ export default function PlanForm({ methods, onSubmit, type, isSubmitting, auditD
                 </Grid>
               </Stack>
 
+              {/* Harga */}
+              <Stack spacing={1}>
+                <Typography variant="subtitle1">Target Pelanggan</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Pilih target pelanggan yang akan mendapatkan potongan harga.
+                </Typography>
+
+                <RHFCheckbox label="All Customer" name="selectedCustomer.allCustomer" />
+                <RHFCheckbox label="New Customer" name="selectedCustomer.newCustomer" />
+                <RHFCheckbox label="Old Customer" name="selectedCustomer.oldCustomer" />
+                <RHFCheckbox label="Auto Renewal Customer" name="selectedCustomer.autoRenewalCustomer" />
+              </Stack>
+
+              <Divider />
+
               {/* Deskripsi */}
               <Stack spacing={1}>
                 <Typography variant="subtitle1">Deskripsi Plan</Typography>
@@ -341,7 +365,7 @@ export default function PlanForm({ methods, onSubmit, type, isSubmitting, auditD
               <Stack spacing={1}>
                 <Typography variant="subtitle1">Akses Modul</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Tentukan modul apa saja yang bisa diakses oleh pengguna pada plan ini.
+                  Tentukan modul yang tersedia dan jumlah kuota pada plan ini.
                 </Typography>
 
                 <TableContainer component={Paper} variant="outlined">
@@ -349,19 +373,15 @@ export default function PlanForm({ methods, onSubmit, type, isSubmitting, auditD
                     <TableHead>
                       <TableRow>
                         <TableCell>Modul</TableCell>
-                        <TableCell align="center">Akses</TableCell>
+                        <TableCell align="center">Aktif</TableCell>
+                        <TableCell align="center">Max Data</TableCell>
                       </TableRow>
                     </TableHead>
 
                     <TableBody>
-                      {MODULES.map((module) => (
-                        <TableRow key={module}>
-                          <TableCell sx={{ textTransform: 'capitalize' }}>{module}</TableCell>
-                          <TableCell align="center">
-                            <RHFSwitch name={`modules.${module.replace(/\s/g, '_')}`} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {MODULES.map((module) => {
+                        return <ModuleRow key={module.key} moduleKey={module.key} label={module.label} />;
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>

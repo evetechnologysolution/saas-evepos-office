@@ -1,11 +1,12 @@
 // @mui
 import { Container } from '@mui/material';
 // routes
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
 import { handleMutationFeedback } from 'src/utils/mutationfeedback';
 import { useNavigate } from 'react-router';
+import { useEffect } from 'react';
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -25,33 +26,56 @@ export default function LibraryCategoryCreate() {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
+  const createModuleDefault = () => ({
+    enabled: false,
+    qty: 0,
+  });
+
   const defaultValues = {
     name: '',
     isActive: true,
+
     price: {
       monthly: 0,
       yearly: 0,
     },
+
+    selectedCustomer: {
+      allCustomer: false,
+      newCustomer: false,
+      oldCustomer: false,
+      autoRenewalCustomer: false,
+    },
+
     discount: {
       monthly: 0,
       yearly: 0,
     },
+
     description: '',
+
     modules: {
-      dashboard: false,
-      pos: false,
-      orders: false,
-      pickup: false,
-      scan_orders: false,
-      sales_report: false,
-      popular_product: false,
-      payment_overview: false,
-      category: false,
-      subcategory: false,
-      product: false,
-      variant: false,
-      promotion: false,
-      user: false,
+      dashboard: createModuleDefault(),
+      dashboardB: createModuleDefault(),
+      dashboardC: createModuleDefault(),
+      dashboardD: createModuleDefault(),
+      dashboardE: createModuleDefault(),
+      pos: createModuleDefault(),
+      orders: createModuleDefault(),
+      pickup: createModuleDefault(),
+      scan_orders: createModuleDefault(),
+
+      sales_report: createModuleDefault(),
+      popular_product: createModuleDefault(),
+      payment_overview: createModuleDefault(),
+
+      category: createModuleDefault(),
+      subcategory: createModuleDefault(),
+      product: createModuleDefault(),
+      variant: createModuleDefault(),
+      promotion: createModuleDefault(),
+
+      user: createModuleDefault(),
     },
   };
 
@@ -62,8 +86,44 @@ export default function LibraryCategoryCreate() {
 
   const {
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
+    watch,
+    control,
   } = methods;
+
+  const formState = watch();
+
+  const allCustomer = useWatch({ name: 'selectedCustomer.allCustomer', control });
+  const newCustomer = useWatch({ name: 'selectedCustomer.newCustomer', control });
+  const oldCustomer = useWatch({ name: 'selectedCustomer.oldCustomer', control });
+  const autoRenewalCustomer = useWatch({
+    name: 'selectedCustomer.autoRenewalCustomer',
+    control,
+  });
+
+  useEffect(() => {
+    if (allCustomer === true) {
+      setValue('selectedCustomer.newCustomer', true);
+      setValue('selectedCustomer.oldCustomer', true);
+      setValue('selectedCustomer.autoRenewalCustomer', true);
+    }
+
+    if (allCustomer === false) {
+      setValue('selectedCustomer.newCustomer', false);
+      setValue('selectedCustomer.oldCustomer', false);
+      setValue('selectedCustomer.autoRenewalCustomer', false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allCustomer]);
+
+  useEffect(() => {
+    const allChecked = newCustomer && oldCustomer && autoRenewalCustomer;
+
+    // HANYA update allCustomer kalau nilainya beda
+    setValue('selectedCustomer.allCustomer', allChecked);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newCustomer, oldCustomer, autoRenewalCustomer]);
 
   const onSubmit = async (data) => {
     await handleMutationFeedback(create.mutateAsync(data), {
@@ -91,6 +151,7 @@ export default function LibraryCategoryCreate() {
           type="create"
           methods={methods}
           isSubmitting={isSubmitting}
+          formState={formState}
           onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
         />
       </Container>
