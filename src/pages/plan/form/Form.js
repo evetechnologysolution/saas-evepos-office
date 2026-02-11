@@ -64,7 +64,6 @@ export const MODULES = [
   { key: 'user', label: 'User' },
 ];
 
-// Helper function untuk format label
 const formatLabel = (key) => {
   return key
     .replace(/_/g, ' ')
@@ -73,7 +72,6 @@ const formatLabel = (key) => {
     .trim();
 };
 
-// Helper function untuk format value
 const formatValue = (value) => {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
@@ -85,7 +83,6 @@ const formatValue = (value) => {
   return String(value);
 };
 
-// Helper function untuk get changed fields
 const getChangedFields = (before, after, parentKey = '') => {
   const changes = [];
 

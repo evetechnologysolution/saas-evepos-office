@@ -13,6 +13,11 @@ const moduleSchema = Yup.object({
     }),
 });
 
+const dashboardModuleSchema = Yup.object({
+  enabled: Yup.boolean().default(false).required(),
+  qty: Yup.number().default(0),
+});
+
 const planSchema = Yup.object({
   name: Yup.string().required('Nama plan wajib diisi'),
 
@@ -52,11 +57,11 @@ const planSchema = Yup.object({
   }),
 
   modules: Yup.object({
-    dashboard: moduleSchema,
-    dashboardB: moduleSchema,
-    dashboardC: moduleSchema,
-    dashboardD: moduleSchema,
-    dashboardE: moduleSchema,
+    dashboard: dashboardModuleSchema,
+    dashboardB: dashboardModuleSchema,
+    dashboardC: dashboardModuleSchema,
+    dashboardD: dashboardModuleSchema,
+    dashboardE: dashboardModuleSchema,
 
     pos: moduleSchema,
     orders: moduleSchema,
