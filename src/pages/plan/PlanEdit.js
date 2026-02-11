@@ -1,13 +1,24 @@
 // @mui
-import { Box, CircularProgress, Container } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 // routes
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
 import { handleMutationFeedback } from 'src/utils/mutationfeedback';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery } from 'react-query';
+import { LoadingButton } from '@mui/lab';
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -19,6 +30,7 @@ import CategoryForm from './form/Form';
 import schema from './schema';
 import useCategory from './service/useCategory';
 import axios from '../../utils/axios';
+
 // ----------------------------------------------------------------------
 export default function LibraryCategoryCreate() {
   const { themeStretch } = useSettings();
@@ -26,6 +38,9 @@ export default function LibraryCategoryCreate() {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [pendingData, setPendingData] = useState(null);
 
   const { data: categoryById, isSuccess: isSuccessById, isLoading: loadingCategoryById } = getById(id);
 
@@ -106,8 +121,13 @@ export default function LibraryCategoryCreate() {
     reset(categoryById);
   }, [isSuccessById, categoryById, reset]);
 
-  const onSubmit = async (data) => {
-    await handleMutationFeedback(update.mutateAsync({ id, payload: data }), {
+  const onPreSubmit = (data) => {
+    setPendingData(data);
+    setOpenConfirm(true);
+  };
+
+  const onSubmit = async () => {
+    await handleMutationFeedback(update.mutateAsync({ id, payload: pendingData }), {
       successMsg: 'Plan berhasil disimpan!',
       errorMsg: 'Gagal menyimpan plan!',
       onSuccess: () => navigate('/dashboard/plan'),
@@ -136,12 +156,27 @@ export default function LibraryCategoryCreate() {
             type="edit"
             methods={methods}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
+            onSubmit={handleSubmit(onPreSubmit, (e) => console.log(e))}
             auditData={auditData}
             loadingAuditData={loadingAuditData}
           />
         )}
       </Container>
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Konfirmasi</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>Apakah Anda yakin data plan sudah benar dan ingin menyimpannya?</DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>Batal</Button>
+          <LoadingButton onClick={onSubmit} variant="contained" autoFocus loading={update.isLoading}>
+            Simpan
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 }

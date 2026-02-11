@@ -1,12 +1,13 @@
 // @mui
-import { Container } from '@mui/material';
+import { Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 // routes
 import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
 import { handleMutationFeedback } from 'src/utils/mutationfeedback';
 import { useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { LoadingButton } from '@mui/lab';
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -24,6 +25,8 @@ export default function LibraryCategoryCreate() {
   const { themeStretch } = useSettings();
   const { create } = useCategory();
   const { enqueueSnackbar } = useSnackbar();
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [pendingData, setPendingData] = useState(null);
   const navigate = useNavigate();
 
   const createModuleDefault = () => ({
@@ -125,8 +128,13 @@ export default function LibraryCategoryCreate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newCustomer, oldCustomer, autoRenewalCustomer]);
 
-  const onSubmit = async (data) => {
-    await handleMutationFeedback(create.mutateAsync(data), {
+  const onPreSubmit = (data) => {
+    setPendingData(data);
+    setOpenConfirm(true);
+  };
+
+  const onSubmit = async () => {
+    await handleMutationFeedback(create.mutateAsync(pendingData), {
       successMsg: 'Plan berhasil disimpan!',
       errorMsg: 'Gagal menyimpan plan!',
       onSuccess: () => navigate('/dashboard/plan'),
@@ -152,9 +160,24 @@ export default function LibraryCategoryCreate() {
           methods={methods}
           isSubmitting={isSubmitting}
           formState={formState}
-          onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
+          onSubmit={handleSubmit(onPreSubmit, (e) => console.log(e))}
         />
       </Container>
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Konfirmasi</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>Apakah Anda yakin data plan sudah benar dan ingin menyimpannya?</DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>Batal</Button>
+          <LoadingButton onClick={onSubmit} variant="contained" autoFocus loading={create.isLoading}>
+            Simpan
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 }
