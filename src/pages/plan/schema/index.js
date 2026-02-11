@@ -1,5 +1,18 @@
 import * as Yup from 'yup';
 
+const moduleSchema = Yup.object({
+  enabled: Yup.boolean().default(false).required(),
+
+  qty: Yup.number()
+    .transform((value) => (Number.isNaN(value) ? 0 : value))
+    .min(0, 'Qty tidak boleh negatif')
+    .default(0)
+    .when('enabled', {
+      is: true,
+      then: (schema) => schema.min(1, 'Qty wajib diisi jika module aktif'),
+    }),
+});
+
 const planSchema = Yup.object({
   name: Yup.string().required('Nama plan wajib diisi'),
 
@@ -31,21 +44,36 @@ const planSchema = Yup.object({
 
   isActive: Yup.boolean().required('Status aktif wajib diisi').default(true),
 
+  selectedCustomer: Yup.object({
+    allCustomer: Yup.boolean().default(false),
+    newCustomer: Yup.boolean().default(false),
+    oldCustomer: Yup.boolean().default(false),
+    autoRenewalCustomer: Yup.boolean().default(false),
+  }),
+
   modules: Yup.object({
-    dashboard: Yup.boolean().default(false),
-    pos: Yup.boolean().default(false),
-    orders: Yup.boolean().default(false),
-    pickup: Yup.boolean().default(false),
-    scan_orders: Yup.boolean().default(false),
-    sales_report: Yup.boolean().default(false),
-    popular_product: Yup.boolean().default(false),
-    payment_overview: Yup.boolean().default(false),
-    category: Yup.boolean().default(false),
-    subcategory: Yup.boolean().default(false),
-    product: Yup.boolean().default(false),
-    variant: Yup.boolean().default(false),
-    promotion: Yup.boolean().default(false),
-    user: Yup.boolean().default(false),
+    dashboard: moduleSchema,
+    dashboardB: moduleSchema,
+    dashboardC: moduleSchema,
+    dashboardD: moduleSchema,
+    dashboardE: moduleSchema,
+
+    pos: moduleSchema,
+    orders: moduleSchema,
+    pickup: moduleSchema,
+    scan_orders: moduleSchema,
+
+    sales_report: moduleSchema,
+    popular_product: moduleSchema,
+    payment_overview: moduleSchema,
+
+    category: moduleSchema,
+    subcategory: moduleSchema,
+    product: moduleSchema,
+    variant: moduleSchema,
+    promotion: moduleSchema,
+
+    user: moduleSchema,
   }).required('Konfigurasi modul wajib diisi'),
 });
 

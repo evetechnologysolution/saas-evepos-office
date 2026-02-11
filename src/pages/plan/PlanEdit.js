@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import { handleMutationFeedback } from 'src/utils/mutationfeedback';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { useQuery } from 'react-query';
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -17,6 +18,7 @@ import HeaderBreadcrumbs from '../../components/HeaderBreadcrumbs';
 import CategoryForm from './form/Form';
 import schema from './schema';
 import useCategory from './service/useCategory';
+import axios from '../../utils/axios';
 // ----------------------------------------------------------------------
 export default function LibraryCategoryCreate() {
   const { themeStretch } = useSettings();
@@ -26,33 +28,65 @@ export default function LibraryCategoryCreate() {
   const { id } = useParams();
 
   const { data: categoryById, isSuccess: isSuccessById, isLoading: loadingCategoryById } = getById(id);
+
+  const { data: auditData, isLoading: loadingAuditData } = useQuery({
+    queryKey: ['plan-history', id],
+    queryFn: async () => {
+      const res = await axios.get(`/audit/entity/Services/${id}`);
+      return res.data;
+    },
+  });
+
+  const createModuleDefault = () => ({
+    enabled: false,
+    qty: 0,
+  });
+
   const defaultValues = {
     name: '',
     isActive: true,
+
     price: {
       monthly: 0,
       yearly: 0,
     },
+
+    selectedCustomer: {
+      allCustomer: false,
+      newCustomer: false,
+      oldCustomer: false,
+      autoRenewalCustomer: false,
+    },
+
     discount: {
       monthly: 0,
       yearly: 0,
     },
+
     description: '',
+
     modules: {
-      dashboard: false,
-      pos: false,
-      orders: false,
-      pickup: false,
-      scan_orders: false,
-      sales_report: false,
-      popular_product: false,
-      payment_overview: false,
-      category: false,
-      subcategory: false,
-      product: false,
-      variant: false,
-      promotion: false,
-      user: false,
+      dashboard: createModuleDefault(),
+      dashboardB: createModuleDefault(),
+      dashboardC: createModuleDefault(),
+      dashboardD: createModuleDefault(),
+      dashboardE: createModuleDefault(),
+      pos: createModuleDefault(),
+      orders: createModuleDefault(),
+      pickup: createModuleDefault(),
+      scan_orders: createModuleDefault(),
+
+      sales_report: createModuleDefault(),
+      popular_product: createModuleDefault(),
+      payment_overview: createModuleDefault(),
+
+      category: createModuleDefault(),
+      subcategory: createModuleDefault(),
+      product: createModuleDefault(),
+      variant: createModuleDefault(),
+      promotion: createModuleDefault(),
+
+      user: createModuleDefault(),
     },
   };
 
@@ -103,6 +137,8 @@ export default function LibraryCategoryCreate() {
             methods={methods}
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
+            auditData={auditData}
+            loadingAuditData={loadingAuditData}
           />
         )}
       </Container>
