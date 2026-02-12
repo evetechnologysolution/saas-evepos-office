@@ -651,7 +651,8 @@ const NotFound = Loadable(lazy(() => import('../pages/Page404')));
 
 // Tenant
 const TenantList = Loadable(lazy(() => import('../pages/tenant/TenantList')));
-const TenantDetail = Loadable(lazy(() => import('../pages/tenant/TenantDetail')));
+// const TenantDetail = Loadable(lazy(() => import('../pages/tenant/TenantDetail')));
+const TenantDetail = Loadable(lazy(() => import('../pages/tenant/tenantDetailV2/TenantDetail')));
 
 // Customer
 const CustomerList = Loadable(lazy(() => import('../pages/customer/CustomerList')));
