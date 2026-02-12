@@ -20,9 +20,13 @@ import {
   Badge,
   Chip,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { FormProvider, RHFTextField } from 'src/components/hook-form';
+import { FormProvider, RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { useForm } from 'react-hook-form';
 import numberWithCommas from 'src/utils/numberWithCommas';
 import Scrollbar from '../../../components/Scrollbar';
@@ -262,14 +266,123 @@ function CurrentSubscriptionTab() {
 }
 
 function AccountStatusTab() {
+  const methods = useForm({
+    defaultValues: {
+      status: 'active',
+      reason: '',
+    },
+  });
+
+  const { handleSubmit } = methods;
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [formData, setFormData] = useState(null);
+
+  const onSubmit = (data) => {
+    setFormData(data);
+    setOpenConfirm(true);
+  };
+
+  const handleConfirm = () => {
+    setOpenConfirm(false);
+    // 🔥 submit ke API di sini
+    console.log('SUBMITTED:', formData);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Account Status
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Halaman status akun akan ditampilkan di sini
-      </Typography>
+      <Grid container spacing={3}>
+        {/* CURRENT STATUS */}
+        <Grid item xs={12}>
+          <Card
+            sx={{
+              p: 3,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography variant="h5">Current Status</Typography>
+            <Chip label="Active" color="success" />
+          </Card>
+        </Grid>
+
+        {/* UPDATE STATUS */}
+        <Grid item xs={12}>
+          <FormProvider methods={methods}>
+            <Box sx={{ p: 3 }}>
+              <Stack spacing={0}>
+                <Typography variant="h5" color="text.secondary">
+                  Update Account Status
+                </Typography>
+
+                <Grid container spacing={3} mt={1}>
+                  {/* STATUS SELECT */}
+                  <Grid item xs={12} md={5}>
+                    <RHFSelect name="status" label="Status" required>
+                      <option value="active">Active</option>
+                      <option value="suspend">Suspend</option>
+                    </RHFSelect>
+                  </Grid>
+
+                  {/* REASON */}
+                  <Grid item xs={12} md={7}>
+                    <RHFTextField
+                      name="reason"
+                      label="Reason"
+                      multiline
+                      rows={4}
+                      required
+                      placeholder="Masukkan alasan perubahan status akun"
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* ACTION */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Icon icon="mdi:content-save-outline" />}
+                    onClick={handleSubmit(onSubmit)}
+                  >
+                    Submit
+                  </Button>
+                </Box>
+              </Stack>
+            </Box>
+          </FormProvider>
+        </Grid>
+      </Grid>
+
+      {/* CONFIRMATION DIALOG */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirm Status Update</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            You are about to update the account status. This action may affect the tenant’s ability to access the
+            system.
+          </Typography>
+
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2">
+              New Status: <b>{formData?.status}</b>
+            </Typography>
+            {formData?.reason && (
+              <Typography variant="body2" color="text.secondary">
+                Reason: {formData.reason}
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} variant="contained" color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
