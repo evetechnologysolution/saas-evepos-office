@@ -22,7 +22,7 @@ const CustomTableRow = styled(TableRow)(() => ({
   },
 }));
 
-export default function TenantInvoiceTableRow({ row }) {
+export default function TenantInvoiceTableRow({ row, number, onClick }) {
   const theme = useTheme();
 
   const { invoiceId, createdAt, amount, status, payment, serviceRef } = row;
@@ -39,14 +39,16 @@ export default function TenantInvoiceTableRow({ row }) {
   };
 
   return (
-    <CustomTableRow hover>
-      <TableCell align="center">{formatDate2(createdAt)}</TableCell>
+    <CustomTableRow hover onClick={() => onClick?.(row)} sx={{ cursor: 'pointer' }}>
+      <TableCell align="center">{numberWithCommas(number)}</TableCell>
 
-      <TableCell align="center">{payment?.paidAt ? formatDate2(payment?.paidAt) : '-'}</TableCell>
+      <TableCell align="left">{payment?.paidAt ? formatDate2(payment?.paidAt) : '-'}</TableCell>
 
       <TableCell align="left">{invoiceId || '-'}</TableCell>
 
       <TableCell align="center">{serviceRef?.name || 'TRIAL'}</TableCell>
+
+      <TableCell align="center">Rp. {numberWithCommas(amount)}</TableCell>
 
       <TableCell align="center" sx={{ textTransform: 'capitalize' }}>
         {payment?.channel || '-'}
@@ -61,8 +63,6 @@ export default function TenantInvoiceTableRow({ row }) {
           {status}
         </Label>
       </TableCell>
-
-      <TableCell align="center">Rp. {numberWithCommas(amount)}</TableCell>
     </CustomTableRow>
   );
 }

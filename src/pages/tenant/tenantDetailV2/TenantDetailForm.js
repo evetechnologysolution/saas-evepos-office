@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // @mui
 import {
@@ -24,11 +24,21 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Select,
+  MenuItem,
+  TableHead,
+  TableRow,
+  TableCell,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { FormProvider, RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { useForm } from 'react-hook-form';
 import numberWithCommas from 'src/utils/numberWithCommas';
+import Slide from '@mui/material/Slide';
+import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Scrollbar from '../../../components/Scrollbar';
 import Label from '../../../components/Label';
 import { TableHeadCustom, TableNoData, TableLoading } from '../../../components/table';
@@ -38,17 +48,32 @@ import TenantInvoiceTableRow from './TenantInvoiceTableRow';
 import { formatDate, formatDate2 } from '../../../utils/getData';
 // service
 import useService from '../service/useService';
+import TenantTableHistoryToolbar from './TenantTableHistoryToolbar';
+import TenantLogTableRow from './TenantLogTableRow';
 
 // ----------------------------------------------------------------------
 const INVOICE_THEAD = [
-  { id: 'createdAt', label: 'Created At', align: 'center' },
-  { id: 'payment.paidAt', label: 'Payment Date', align: 'center' },
-  { id: 'invoiceId', label: 'Invoice ID', align: 'left' },
-  { id: '', label: 'Plan', align: 'center' },
-  { id: 'payment.channel', label: 'Payment Channel', align: 'center' },
-  { id: 'status', label: 'Status', align: 'center' },
-  { id: 'amount', label: 'Total', align: 'center' },
+  { id: 'no', label: 'No', align: 'center' },
+  { id: 'payment.paidAt', label: 'Transaction Date', align: 'left' },
+  { id: 'purchases', label: 'Purchases', align: 'left' },
+  { id: 'billingPeriod', label: 'Billing Period', align: 'center' },
+  { id: 'total', label: 'Total', align: 'center' },
+  { id: 'paymentMethod', label: 'Payment Method', align: 'center' },
+  { id: 'paymentStatus', label: 'Payment Status', align: 'center' },
 ];
+
+const LOG_THEAD = [
+  { id: 'no', label: 'No', align: 'center' },
+  { id: 'timeStamp', label: 'Timestamp', align: 'left' },
+  { id: 'log', label: 'Activity', align: 'left' },
+  { id: 'description', label: 'Description', align: 'left' },
+  { id: 'notes', label: 'Notes', align: 'left' },
+  { id: '', label: 'Updated By', align: 'left' },
+];
+
+const Transition = forwardRef((props, ref) => {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 // ----------------------------------------------------------------------
 // Tab Panels Components
@@ -58,7 +83,7 @@ function TenantInformationTab() {
   const methods = useForm();
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1 }}>
       <FormProvider methods={methods}>
         <Grid container spacing={3} mt={3}>
           {/* LEFT COLUMN */}
@@ -142,7 +167,7 @@ function TenantInformationTab() {
 
 function CurrentSubscriptionTab() {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1 }}>
       <Grid container spacing={3}>
         {/* TOP CARD */}
         <Grid item xs={12}>
@@ -289,7 +314,7 @@ function AccountStatusTab() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1 }}>
       <Grid container spacing={3}>
         {/* CURRENT STATUS */}
         <Grid item xs={12}>
@@ -388,27 +413,376 @@ function AccountStatusTab() {
 }
 
 function SubscriptionHistoryTab() {
+  const { listInvoice } = useService();
+  const { id = '' } = useParams();
+
+  const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
+  const [statusPayment, setStatusPayment] = useState('allStatusPayment');
+  const [openDetail, setOpenDetail] = useState(false);
+
+  const [controller, setController] = useState({
+    page: 0,
+    rowsPerPage: 10,
+    search: '',
+    role: '',
+    status: '',
+  });
+
+  const { data: tableData, isLoading } = listInvoice({
+    page: controller.page + 1,
+    perPage: controller.rowsPerPage,
+    search: controller.search,
+    tenant: id,
+  });
+
+  const handlePageChange = (event, newPage) => {
+    setController({
+      ...controller,
+      page: newPage,
+    });
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setController({
+      ...controller,
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
+  };
+
+  const handleClickDetail = (data) => {
+    console.log(data);
+    setOpenDetail(true);
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Subscription History
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Halaman riwayat subscription akan ditampilkan di sini
-      </Typography>
+    <Box sx={{ p: 1 }}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} md={6}>
+          <Stack direction="row" spacing={2}>
+            <Select fullWidth value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+              <MenuItem value="allPaymentMethod">All Payment Method</MenuItem>
+              <MenuItem value="creditCard">Credit Card</MenuItem>
+              <MenuItem value="virtualAccount">Virtual Account</MenuItem>
+              <MenuItem value="linkPayment">Link Payment</MenuItem>
+            </Select>
+
+            <Select fullWidth value={statusPayment} onChange={(e) => setStatusPayment(e.target.value)}>
+              <MenuItem value="allStatusPayment">All Status</MenuItem>
+              <MenuItem value="success">Success</MenuItem>
+              <MenuItem value="canceled">Canceled</MenuItem>
+            </Select>
+          </Stack>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TenantTableHistoryToolbar filterName={''} onFilterName={() => {}} onEnter={() => {}} />
+        </Grid>
+      </Grid>
+
+      <Box>
+        <Scrollbar>
+          <TableContainer sx={{ minWidth: 980, position: 'relative' }}>
+            <Table size="small">
+              <TableHeadCustom headLabel={INVOICE_THEAD} rowCount={tableData?.docs?.length} />
+
+              <TableBody>
+                {!isLoading ? (
+                  <>
+                    {tableData?.docs?.map((row, index) => (
+                      <TenantInvoiceTableRow
+                        key={row._id}
+                        row={row}
+                        number={index + 1}
+                        onClick={(data) => {
+                          handleClickDetail(data);
+                        }}
+                      />
+                    ))}
+
+                    <TableNoData isNotFound={tableData?.docs?.length === 0} />
+                  </>
+                ) : (
+                  <TableLoading />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Scrollbar>
+
+        <Box sx={{ position: 'relative' }}>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={Number(tableData?.totalDocs || 0)}
+            rowsPerPage={controller.rowsPerPage}
+            page={controller.page}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Box>
+      </Box>
+
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} fullScreen TransitionComponent={Transition}>
+        <DialogContent sx={{ mt: 2 }}>
+          {/* KODE TRANSAKSI */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h5" fontWeight={600}>
+              Kode Transaksi
+            </Typography>
+            <Typography variant="h5" fontWeight={700} color="primary">
+              SBSC2024000057RE
+            </Typography>
+          </Box>
+
+          {/* DETAIL PEMESAN */}
+          <Card sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" mb={2}>
+              Detail Pemesan
+            </Typography>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3}>
+                <Typography variant="caption" color="text.secondary">
+                  User
+                </Typography>
+                <Typography>Jane Doe</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <Typography variant="caption" color="text.secondary">
+                  Pemesan
+                </Typography>
+                <Typography>Jane Doe</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <Typography variant="caption" color="text.secondary">
+                  Email
+                </Typography>
+                <Typography>janedoe123@gmail.com</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <Typography variant="caption" color="text.secondary">
+                  Telepon
+                </Typography>
+                <Typography>628122334455</Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary">
+                  Alamat
+                </Typography>
+                <Typography>Surakarta, Indonesia</Typography>
+              </Grid>
+            </Grid>
+          </Card>
+
+          {/* DETAIL PEMBELIAN */}
+          <Card sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" mb={2}>
+              Detail Pembelian
+            </Typography>
+
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nama Outlet</TableCell>
+                  <TableCell>Tanggal</TableCell>
+                  <TableCell>Nama Paket</TableCell>
+                  <TableCell>Jumlah</TableCell>
+                  <TableCell align="right">Harga</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Jane Business</TableCell>
+                  <TableCell>29 Apr 2024 11.44</TableCell>
+                  <TableCell>Trial</TableCell>
+                  <TableCell>30 Hari</TableCell>
+                  <TableCell align="right">Rp0</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Card>
+
+          {/* TOTAL TAGIHAN */}
+          <Card sx={{ p: 3 }}>
+            <Box display="flex" justifyContent="space-between" mb={2}>
+              <Typography variant="h6">TOTAL TAGIHAN</Typography>
+              <Typography variant="h6" fontWeight={700}>
+                Rp0
+              </Typography>
+            </Box>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Metode Pembayaran
+                </Typography>
+                <Typography>Credit Card</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6} textAlign="right">
+                <Typography variant="caption" color="text.secondary">
+                  Status
+                </Typography>
+                <Box mt={1}>
+                  <Chip label="Success" color="success" size="small" />
+                </Box>
+              </Grid>
+            </Grid>
+          </Card>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpenDetail(false)} variant="outlined">
+            Tutup
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
 
 function ActivityLogTab() {
+  const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
+  const [topStartDate, setTopStartDate] = useState(null);
+  const [topEndDate, setTopEndDate] = useState(null);
+  const [ctrlLog, setCtrlLog] = useState({
+    page: 0,
+    rowsPerPage: 10,
+    search: '',
+    status: '',
+  });
+
+  const { id = '' } = useParams();
+  const { listActivity } = useService();
+
+  const { data: tableLog, isLoading: loadingLog } = listActivity({
+    page: ctrlLog.page + 1,
+    perPage: ctrlLog.rowsPerPage,
+    search: ctrlLog.search,
+    tenant: id,
+  });
+
+  const handlePageChangeLog = (event, newPage) => {
+    setCtrlLog({
+      ...ctrlLog,
+      page: newPage,
+    });
+  };
+
+  const handleChangeRowsPerPageLog = (event) => {
+    setCtrlLog({
+      ...ctrlLog,
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Activity Log
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Halaman log aktivitas akan ditampilkan di sini
-      </Typography>
+    <Box sx={{ p: 1 }}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} md={4}>
+          <Stack direction="row" spacing={2}>
+            <Select fullWidth value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+              <MenuItem value="allPaymentMethod">All Payment Method</MenuItem>
+              <MenuItem value="creditCard">Credit Card</MenuItem>
+              <MenuItem value="virtualAccount">Virtual Account</MenuItem>
+              <MenuItem value="linkPayment">Link Payment</MenuItem>
+            </Select>
+          </Stack>
+        </Grid>
+
+        <Grid item xs={12} md={4} sm="auto">
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <MobileDatePicker
+              label="Start Date"
+              inputFormat="dd/MM/yyyy"
+              value={topStartDate}
+              onChange={(newValue) => {
+                setTopStartDate(newValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <img src="/assets/calender-icon.svg" alt="icon" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
+
+        <Grid item xs={12} md={4} sm="auto">
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <MobileDatePicker
+              label="End Date"
+              inputFormat="dd/MM/yyyy"
+              value={topEndDate}
+              onChange={(newValue) => {
+                setTopEndDate(newValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <img src="/assets/calender-icon.svg" alt="icon" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
+      </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Scrollbar>
+          <TableContainer sx={{ minWidth: 980 }}>
+            <Table size="small">
+              <TableHeadCustom headLabel={LOG_THEAD} rowCount={tableLog?.docs?.length} />
+
+              <TableBody>
+                {!loadingLog ? (
+                  <>
+                    {tableLog?.docs?.map((row, index) => (
+                      <TenantLogTableRow key={row._id} row={row} number={index + 1} />
+                    ))}
+
+                    <TableNoData isNotFound={tableLog?.docs?.length === 0} />
+                  </>
+                ) : (
+                  <TableLoading />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Scrollbar>
+
+        <Box sx={{ position: 'relative' }}>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={Number(tableLog?.totalDocs || 0)}
+            rowsPerPage={ctrlLog.rowsPerPage}
+            page={ctrlLog.page}
+            onPageChange={handlePageChangeLog}
+            onRowsPerPageChange={handleChangeRowsPerPageLog}
+          />
+        </Box>
+      </Box>
     </Box>
   );
 }
