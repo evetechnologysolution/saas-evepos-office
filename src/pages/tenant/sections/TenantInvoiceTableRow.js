@@ -11,8 +11,6 @@ import { formatDate2, numberWithCommas } from '../../../utils/getData';
 
 TenantInvoiceTableRow.propTypes = {
   row: PropTypes.object,
-  onDetailRow: PropTypes.func,
-  onDeleteRow: PropTypes.func,
 };
 
 const CustomTableRow = styled(TableRow)(() => ({
