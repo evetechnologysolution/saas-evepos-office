@@ -1056,6 +1056,9 @@ export default function TenantDetail() {
       <Card sx={{ p: 3 }}>
         <Stack>
           <Tabs
+            allowScrollButtonsMobile
+            variant="scrollable"
+            scrollButtons="auto"
             value={currentTab}
             onChange={handleChangeTab}
             sx={{
