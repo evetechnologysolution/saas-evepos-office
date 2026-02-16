@@ -1,5 +1,8 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from 'notistack';
 // @mui
 import {
   Box,
@@ -17,8 +20,6 @@ import {
   Tabs,
   Tab,
   Avatar,
-  Badge,
-  Chip,
   Tooltip,
   Dialog,
   DialogTitle,
@@ -32,9 +33,9 @@ import {
   TextField,
   InputAdornment,
 } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import { Icon } from '@iconify/react';
 import { FormProvider, RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { useForm } from 'react-hook-form';
 import numberWithCommas from 'src/utils/numberWithCommas';
 import Slide from '@mui/material/Slide';
 import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers';
@@ -42,10 +43,15 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Scrollbar from '../../../components/Scrollbar';
 import Label from '../../../components/Label';
 import { TableHeadCustom, TableNoData, TableLoading } from '../../../components/table';
-import { PATH_DASHBOARD } from '../../../routes/paths';
+import ConfirmDelete from '../../../components/ConfirmDelete';
 import TenantInvoiceTableRow from './TenantInvoiceTableRow';
 // utils
-import { formatDate, formatDate2 } from '../../../utils/getData';
+import { formatDate2 } from '../../../utils/getData';
+// routes
+import { PATH_DASHBOARD } from '../../../routes/paths';
+// schema
+import schema from '../schema';
+import accountSchema from '../schema/account';
 // service
 import useService from '../service/useService';
 import TenantTableHistoryToolbar from './TenantTableHistoryToolbar';
@@ -66,7 +72,6 @@ const LOG_THEAD = [
   { id: 'no', label: 'No', align: 'center' },
   { id: 'timeStamp', label: 'Timestamp', align: 'left' },
   { id: 'log', label: 'Activity', align: 'left' },
-  { id: 'description', label: 'Description', align: 'left' },
   { id: 'notes', label: 'Notes', align: 'left' },
   { id: '', label: 'Updated By', align: 'left' },
 ];
@@ -80,7 +85,54 @@ const Transition = forwardRef((props, ref) => {
 // ----------------------------------------------------------------------
 
 function TenantInformationTab() {
-  const methods = useForm();
+  const { id = '' } = useParams();
+  const { getById, remove } = useService();
+  const { data: dataTenant, isSuccess: successTenant, isLoading: loadingTenant } = getById(id);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
+  const [openDelete, setOpenDelete] = useState(false);
+
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: schema.getDefault(),
+  });
+
+  const {
+    // control,
+    // watch,
+    // setValue,
+    // handleSubmit,
+    // formState: { isSubmitting },
+    reset,
+  } = methods;
+
+  useEffect(() => {
+    if (!successTenant) return;
+
+    const objData = {
+      ...dataTenant,
+      registeredAt: dataTenant?.createdAt ? formatDate2(dataTenant?.createdAt) : '',
+    };
+
+    reset(objData);
+  }, [successTenant, dataTenant, reset]);
+
+  const handleDelete = async () => {
+    if (!dataTenant?._id) return;
+
+    try {
+      await remove.mutateAsync(dataTenant?._id);
+
+      enqueueSnackbar('Tenant deleted!', { variant: 'success' });
+      navigate(PATH_DASHBOARD.tenant.root);
+      setOpenDelete(false);
+    } catch (err) {
+      enqueueSnackbar(err?.message || 'Something went wrong', {
+        variant: 'error',
+      });
+    }
+  };
 
   return (
     <Box sx={{ p: 1 }}>
@@ -96,71 +148,189 @@ function TenantInformationTab() {
               }}
             >
               {/* Profile Photo */}
-              <Avatar
-                sx={{
-                  width: 120,
-                  height: 120,
-                  bgcolor: 'background.neutral',
-                  color: 'text.primary',
-                  fontSize: 40,
-                  fontWeight: 600,
-                }}
-              >
-                T
-              </Avatar>
-
-              <Box>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Nama Tenant
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  tenant@email.com
-                </Typography>
-              </Box>
-
-              <Divider flexItem />
-
-              {/* Delete Account */}
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<Icon icon="mdi:trash-outline" />}
-                sx={{
-                  mt: 1,
-                }}
-              >
-                Hapus Akun
-              </Button>
+              {loadingTenant ? (
+                <>
+                  <Skeleton variant="circular" width="120px" height="120px" />
+                  <Skeleton variant="text" width="200px" height="56px" />
+                  <Divider flexItem />
+                  <Skeleton variant="text" width="200px" height="56px" />
+                </>
+              ) : (
+                <>
+                  <Avatar
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      bgcolor: 'background.neutral',
+                      color: 'text.primary',
+                      fontSize: 40,
+                      fontWeight: 600,
+                    }}
+                    alt={dataTenant?.businessName}
+                    src={dataTenant?.image}
+                  />
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {dataTenant?.businessName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {dataTenant?.email}
+                    </Typography>
+                  </Box>
+                  <Divider flexItem />
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Icon icon="mdi:trash-outline" />}
+                    onClick={() => setOpenDelete(true)}
+                  >
+                    Hapus Akun
+                  </Button>
+                </>
+              )}
             </Stack>
           </Grid>
 
           {/* MIDDLE COLUMN */}
-          <Grid item xs={12} md={4}>
-            <Stack spacing={3}>
-              <RHFTextField name="username" label="Username" disabled />
-              <RHFTextField name="email" label="Email Address" disabled />
-              <RHFTextField name="phone" label="No. Handphone" disabled />
-              <RHFTextField name="tenantId" label="ID Tenant" disabled />
-              <RHFTextField name="owner" label="Nama Pemilik Usaha" disabled />
-              <RHFTextField name="bussinessType" label="Bidang Usaha" disabled />
-              <RHFTextField name="address" label="Address" disabled />
-              <RHFTextField name="city" label="Kota" disabled />
-            </Stack>
-          </Grid>
-
-          {/* RIGHT COLUMN */}
-          <Grid item xs={12} md={4}>
-            <Stack spacing={3}>
-              <RHFTextField name="aboutTenant" label="Tentang" multiline rows={4} disabled />
-              <RHFTextField name="registDate" label="Tanggal Registrasi" disabled />
-              <RHFTextField name="bussinessName" label="Nama Usaha" disabled />
-              <RHFTextField name="bussinessAge" label="Lama Beroperasi" disabled />
-              <RHFTextField name="province" label="Provinsi" disabled />
-              <RHFTextField name="district" label="Kecamatan" disabled />
-            </Stack>
+          <Grid item xs={12} md={8}>
+            <Box
+              sx={{
+                display: 'grid',
+                gap: 3,
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              }}
+            >
+              <Stack spacing={3}>
+                <RHFTextField
+                  name="registeredAt"
+                  label="Tgl Registrasi"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="tenantId"
+                  label="ID Tenant"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="businessName"
+                  label="Nama Usaha"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="businessType"
+                  label="Bidang Usaha"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="description"
+                  label="Deskripsi Usaha"
+                  multiline
+                  rows={4.48}
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="operatingSince"
+                  label="Lama Beroperasi"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="legalStatus"
+                  label="Bentuk Usaha"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Stack>
+              <Stack spacing={3}>
+                <RHFTextField
+                  name="ownerName"
+                  label="Nama Pemilik Usaha"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="phone"
+                  label="No. Handphone"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="email"
+                  label="Email Address"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="address"
+                  label="Address"
+                  multiline
+                  rows={4.48}
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="province"
+                  label="Provinsi"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="city"
+                  label="Kota"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+                <RHFTextField
+                  name="district"
+                  label="Kecamatan"
+                  loading={loadingTenant}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Stack>
+            </Box>
           </Grid>
         </Grid>
       </FormProvider>
+
+      <ConfirmDelete
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        onDelete={handleDelete}
+        isLoading={remove.isLoading}
+      />
     </Box>
   );
 }
@@ -211,7 +381,9 @@ function CurrentSubscriptionTab() {
             </Box>
 
             {/* RIGHT STATUS */}
-            <Chip label="Active" color="success" size="small" sx={{ mt: 0.5 }} />
+            <Label variant="ghost" color="success" sx={{ textTransform: 'capitalize', mt: 0.5 }}>
+              Active
+            </Label>
           </Card>
         </Grid>
 
@@ -291,26 +463,82 @@ function CurrentSubscriptionTab() {
 }
 
 function AccountStatusTab() {
+  const { enqueueSnackbar } = useSnackbar();
+  const { id = '' } = useParams();
+  const { getById, activate, suspend } = useService();
+  const { data: dataAccount, isSuccess: successAccount, isLoading: loadingAccount } = getById(id);
+
   const methods = useForm({
-    defaultValues: {
-      status: 'active',
-      reason: '',
-    },
+    resolver: yupResolver(accountSchema),
+    defaultValues: accountSchema.getDefault(),
   });
 
-  const { handleSubmit } = methods;
+  const {
+    // control,
+    // watch,
+    // setValue,
+    handleSubmit,
+    // formState: { isSubmitting },
+    reset,
+  } = methods;
+
+  useEffect(() => {
+    if (!successAccount) return;
+
+    reset(dataAccount);
+  }, [successAccount, dataAccount, reset]);
+
   const [openConfirm, setOpenConfirm] = useState(false);
   const [formData, setFormData] = useState(null);
+
+  const accStatusColor = (val = '') => {
+    switch (val) {
+      case 'active':
+        return 'success';
+      case 'suspended':
+        return 'warning';
+      case 'inactive':
+        return 'error';
+      case 'pending':
+        return 'default';
+      default:
+        return 'default';
+    }
+  };
 
   const onSubmit = (data) => {
     setFormData(data);
     setOpenConfirm(true);
   };
 
-  const handleConfirm = () => {
-    setOpenConfirm(false);
-    // 🔥 submit ke API di sini
-    console.log('SUBMITTED:', formData);
+  const handleConfirm = async () => {
+    if (!dataAccount?._id) return;
+
+    try {
+      if (formData?.status === 'active') {
+        await activate.mutateAsync({
+          id: dataAccount._id,
+          payload: { reason: formData?.reason },
+        });
+
+        enqueueSnackbar('Tenant activated!', { variant: 'success' });
+      }
+
+      if (formData?.status === 'suspended') {
+        await suspend.mutateAsync({
+          id: dataAccount._id,
+          payload: { reason: formData?.reason },
+        });
+
+        enqueueSnackbar('Tenant suspended!', { variant: 'success' });
+      }
+
+      setOpenConfirm(false);
+    } catch (err) {
+      enqueueSnackbar(err?.message || 'Something went wrong', {
+        variant: 'error',
+      });
+    }
   };
 
   return (
@@ -327,7 +555,9 @@ function AccountStatusTab() {
             }}
           >
             <Typography variant="h5">Current Status</Typography>
-            <Chip label="Active" color="success" />
+            <Label variant="ghost" color={accStatusColor(dataAccount?.status)} sx={{ textTransform: 'capitalize' }}>
+              {dataAccount?.status}
+            </Label>
           </Card>
         </Grid>
 
@@ -343,9 +573,9 @@ function AccountStatusTab() {
                 <Grid container spacing={3} mt={1}>
                   {/* STATUS SELECT */}
                   <Grid item xs={12} md={5}>
-                    <RHFSelect name="status" label="Status" required>
-                      <option value="active">Active</option>
-                      <option value="suspend">Suspend</option>
+                    <RHFSelect name="status" label="Status" SelectProps={{ native: false }} required>
+                      <MenuItem value="active">Active</MenuItem>
+                      <MenuItem value="suspended">Suspend</MenuItem>
                     </RHFSelect>
                   </Grid>
 
@@ -356,7 +586,6 @@ function AccountStatusTab() {
                       label="Reason"
                       multiline
                       rows={4}
-                      required
                       placeholder="Masukkan alasan perubahan status akun"
                     />
                   </Grid>
@@ -369,6 +598,7 @@ function AccountStatusTab() {
                     color="primary"
                     startIcon={<Icon icon="mdi:content-save-outline" />}
                     onClick={handleSubmit(onSubmit)}
+                    disabled={loadingAccount}
                   >
                     Submit
                   </Button>
@@ -380,32 +610,45 @@ function AccountStatusTab() {
       </Grid>
 
       {/* CONFIRMATION DIALOG */}
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+      <Dialog open={openConfirm}>
         <DialogTitle>Confirm Status Update</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            You are about to update the account status. This action may affect the tenant’s ability to access the
+            You are about to update the account status. This action may affect the tenant's ability to access the
             system.
           </Typography>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2">
-              New Status: <b>{formData?.status}</b>
-            </Typography>
-            {formData?.reason && (
-              <Typography variant="body2" color="text.secondary">
-                Reason: {formData.reason}
+          <Stack gap={1} sx={{ mt: 2 }}>
+            <Box>
+              <Typography variant="subtitle2" sx={{ textTransform: 'capitalize' }}>
+                New Status :
               </Typography>
-            )}
-          </Box>
+              <Label variant="ghost" color={accStatusColor(formData?.status)} sx={{ textTransform: 'capitalize' }}>
+                {formData?.status === 'suspended' ? 'suspend' : formData?.status}
+              </Label>
+            </Box>
+            <Box>
+              {formData?.reason && (
+                <>
+                  <Typography variant="subtitle2">Reason :</Typography>
+                  <Typography variant="body2">{formData.reason}</Typography>
+                </>
+              )}
+            </Box>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)} color="inherit">
+          <Button onClick={() => setOpenConfirm(false)} variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleConfirm} variant="contained" color="primary">
+          <LoadingButton
+            onClick={handleConfirm}
+            variant="contained"
+            color="primary"
+            loading={activate.isLoading || suspend.isLoading}
+          >
             Confirm
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </Box>
@@ -523,7 +766,7 @@ function SubscriptionHistoryTab() {
         </Box>
       </Box>
 
-      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} fullScreen TransitionComponent={Transition}>
+      <Dialog open={openDetail} fullScreen TransitionComponent={Transition}>
         <DialogContent sx={{ mt: 2 }}>
           {/* KODE TRANSAKSI */}
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -629,7 +872,9 @@ function SubscriptionHistoryTab() {
                   Status
                 </Typography>
                 <Box mt={1}>
-                  <Chip label="Success" color="success" size="small" />
+                  <Label variant="ghost" color="success" sx={{ textTransform: 'capitalize' }}>
+                    Success
+                  </Label>
                 </Box>
               </Grid>
             </Grid>
@@ -637,7 +882,7 @@ function SubscriptionHistoryTab() {
         </DialogContent>
 
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setOpenDetail(false)} variant="outlined">
+          <Button onClick={() => setOpenDetail(false)} variant="contained">
             Tutup
           </Button>
         </DialogActions>

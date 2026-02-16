@@ -182,29 +182,35 @@ export default function TenantList() {
   const handleActivate = () => {
     if (!selectedId) return;
 
-    activate.mutate(selectedId, {
-      onSuccess: () => {
-        enqueueSnackbar('Tenant activated!', { variant: 'success' });
-        setOpenActivate(false);
-      },
-      onError: (err) => {
-        enqueueSnackbar(err?.message || 'Failed to activate', { variant: 'error' });
-      },
-    });
+    activate.mutate(
+      { id: selectedId, payload: {} },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Tenant activated!', { variant: 'success' });
+          setOpenActivate(false);
+        },
+        onError: (err) => {
+          enqueueSnackbar(err?.message || 'Failed to activate', { variant: 'error' });
+        },
+      }
+    );
   };
 
   const handleSuspend = () => {
     if (!selectedId) return;
 
-    suspend.mutate(selectedId, {
-      onSuccess: () => {
-        enqueueSnackbar('Tenant suspended!', { variant: 'success' });
-        setOpenSuspend(false);
-      },
-      onError: (err) => {
-        enqueueSnackbar(err?.message || 'Failed to suspend', { variant: 'error' });
-      },
-    });
+    suspend.mutate(
+      { id: selectedId, payload: {} },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Tenant suspended!', { variant: 'success' });
+          setOpenSuspend(false);
+        },
+        onError: (err) => {
+          enqueueSnackbar(err?.message || 'Failed to suspend', { variant: 'error' });
+        },
+      }
+    );
   };
 
   return (

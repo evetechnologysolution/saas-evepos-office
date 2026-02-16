@@ -83,8 +83,8 @@ export default function useCall() {
   });
 
   const activate = useMutation({
-    mutationFn: async (id) => {
-      const { data } = await axios.patch(`/tenant/activate/${id}`);
+    mutationFn: async ({ id, payload }) => {
+      const { data } = await axios.patch(`/tenant/activate/${id}`, payload);
       return data;
     },
     onSuccess: () => {
@@ -93,8 +93,8 @@ export default function useCall() {
   });
 
   const suspend = useMutation({
-    mutationFn: async (id) => {
-      const { data } = await axios.patch(`/tenant/suspend/${id}`);
+    mutationFn: async ({ id, payload }) => {
+      const { data } = await axios.patch(`/tenant/suspend/${id}`, payload);
       return data;
     },
     onSuccess: () => {

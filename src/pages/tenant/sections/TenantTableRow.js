@@ -172,7 +172,7 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow, onActiva
                 <Iconify icon="fluent:apps-list-detail-24-regular" sx={{ width: 24, height: 24 }} />
                 Detail
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 sx={{ color: isActive(status) ? '#B78103' : '#229A16' }}
                 onClick={() => {
                   if (isActive(status)) {
@@ -185,8 +185,8 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow, onActiva
               >
                 <Iconify icon="typcn:warning-outline" sx={{ width: 24, height: 24 }} />
                 {isActive(status) ? 'Non-Aktifkan' : 'Aktifkan'}
-              </MenuItem>
-              {/* {user?.role === 'super admin' && (
+              </MenuItem> */}
+              {user?.role === 'super admin' && (
                 <MenuItem
                   sx={{ color: 'red' }}
                   onClick={() => {
@@ -197,7 +197,7 @@ export default function TenantTableRow({ row, onDetailRow, onDeleteRow, onActiva
                   <Iconify icon="eva:trash-2-outline" sx={{ width: 24, height: 24 }} />
                   Delete
                 </MenuItem>
-              )} */}
+              )}
             </>
           }
         />

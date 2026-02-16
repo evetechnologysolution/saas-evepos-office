@@ -18,7 +18,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 }));
 
 export default function TenantLogTableRow({ row, number }) {
-  const { createdAt, log, updatedBy } = row;
+  const { createdAt, log, notes, updatedBy } = row;
 
   return (
     <CustomTableRow hover>
@@ -27,8 +27,7 @@ export default function TenantLogTableRow({ row, number }) {
       <TableCell align="left">{formatDate2(createdAt)}</TableCell>
 
       <TableCell align="left">{log || '-'}</TableCell>
-      <TableCell align="left">{'-'}</TableCell>
-      <TableCell align="left">{'-'}</TableCell>
+      <TableCell align="left">{notes || '-'}</TableCell>
 
       <TableCell align="left">{updatedBy?.fullname || '-'}</TableCell>
     </CustomTableRow>
