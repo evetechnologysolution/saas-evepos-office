@@ -409,26 +409,21 @@ export default function Router() {
           ],
         },
         {
-          path: 'list/gallery',
-          children: [
-            {
-              path: '',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin']}>
-                  <Subscription />
-                </RoleBasedGuard>
-              ),
-            },
-          ],
-        },
-        {
           path: 'subscription',
           children: [
             {
               path: '',
               element: (
                 <RoleBasedGuard hasContent roles={['super admin']}>
-                  <Subscription />
+                  <SubscriptionList />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/detail',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin']}>
+                  <SubscriptionDetail />
                 </RoleBasedGuard>
               ),
             },
@@ -699,7 +694,8 @@ const UserAccount = Loadable(lazy(() => import('../pages/UserAccount')));
 const UserProfile = Loadable(lazy(() => import('../pages/UserProfile')));
 
 // SUBSCRIPTION
-const Subscription = Loadable(lazy(() => import('../pages/subscription/Subscription')));
+const SubscriptionList = Loadable(lazy(() => import('../pages/subscription/SubscriptionList')));
+const SubscriptionDetail = Loadable(lazy(() => import('../pages/subscription/SubscriptionDetail')));
 
 // SETTINGS
 const Settings = Loadable(lazy(() => import('../pages/setting/general/Settings')));

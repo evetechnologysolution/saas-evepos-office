@@ -1,10 +1,13 @@
 import { paramCase } from 'change-case';
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
+import {
+  useNavigate,
+  // Link as RouterLink
+} from 'react-router-dom';
 // @mui
 import {
   Box,
+  // Button,
   Card,
   Table,
   Switch,
@@ -13,7 +16,6 @@ import {
   TableContainer,
   TablePagination,
   FormControlLabel,
-  Button,
   Stack,
   Typography,
 } from '@mui/material';
@@ -22,53 +24,58 @@ import useSettings from '../../hooks/useSettings';
 import useTable from '../../hooks/useTable';
 // components
 import Page from '../../components/Page';
-import Iconify from '../../components/Iconify';
 import Scrollbar from '../../components/Scrollbar';
 import { TableHeadCustom, TableLoading, TableNoData } from '../../components/table';
-import ConfirmDelete from '../../components/ConfirmDelete';
 // sections
-import { PlanTableToolbar, PlanTableRow } from './sections';
-// utils
-import useCategory from './service/useCategory';
+import { SubscriptionTableToolbar, SubscriptionTableRow } from './sections';
+// context
+import { roleOptions } from '../../_mock/roleOptions';
+import useService from './service/useService';
 
 // ----------------------------------------------------------------------
 
+const STATUS_OPTIONS = ['All', 'Active', 'Inactive'];
+
+const ROLE_OPTIONS = ['All', ...roleOptions];
+
 const TABLE_HEAD = [
-  { id: 'createdAt', label: 'Created At', align: 'center' },
-  { id: 'name', label: 'Plan Name', align: 'left' },
-  { id: 'pricing', label: 'Pricing', align: 'center' },
-  { id: 'discount', label: 'Discount', align: 'center' },
-  { id: 'description', label: 'Description', align: 'center' },
-  { id: 'totalcustomer', label: 'Total Tenant', align: 'center' },
-  { id: 'status', label: 'Status', align: 'center' },
+  { id: '', label: 'Updated At', align: 'center' },
+  { id: '', label: 'Subscription ID', align: 'left' },
+  { id: '', label: 'Owner Name', align: 'left' },
+  { id: '', label: 'Business Name', align: 'left' },
+  { id: '', label: 'Contact', align: 'center' },
+  { id: '', label: 'Subscription Plan', align: 'center' },
+  { id: '', label: 'Subscription Status', align: 'center' },
   { id: '', label: 'Action', align: 'center' },
 ];
 
 // ----------------------------------------------------------------------
 
-export default function LibraryCategory() {
+export default function SubscriptionList() {
+  const { dense, onChangeDense } = useTable();
   const { themeStretch } = useSettings();
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
-  const { dense, onChangeDense } = useTable();
-  const { list, remove } = useCategory();
+  const { list } = useService();
+
+  const [filterRole, setFilterRole] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [search, setSearch] = useState('');
 
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
     search: '',
+    role: '',
+    status: '',
   });
 
   const { data: tableData, isLoading } = list({
     page: controller.page + 1,
     perPage: controller.rowsPerPage,
     search: controller.search,
+    sort: 'updatedAt',
+    // status: "pending:ne"
   });
-
-  const [selectedId, setSelectedId] = useState('');
-  const [open, setOpen] = useState(false);
-
-  const [search, setSearch] = useState('');
 
   const handlePageChange = (event, newPage) => {
     setController({
@@ -94,41 +101,47 @@ export default function LibraryCategory() {
       setController({
         page: 0,
         rowsPerPage: controller.rowsPerPage,
-        search,
+        search: search !== '' ? search : '',
+        role: filterRole !== 'All' ? filterRole : '',
+        status: filterStatus !== 'All' ? filterStatus?.toLowerCase() : '',
       });
     }
   };
 
-  const handleEditRow = (id) => {
-    navigate(`/dashboard/plan/${paramCase(id)}/edit`);
-  };
-
-  const handleDialog = (id) => {
-    setSelectedId(id);
-    setOpen(!open);
-  };
-
-  const handleDelete = () => {
-    if (!selectedId) return;
-
-    remove.mutate(selectedId, {
-      onSuccess: () => {
-        enqueueSnackbar('Plan deleted!', { variant: 'success' });
-        setOpen(false);
-      },
-      onError: (err) => {
-        enqueueSnackbar(err?.message || 'Failed to delete', { variant: 'error' });
-      },
+  const handleFilterRole = (event) => {
+    const { value } = event.target;
+    setFilterRole(value);
+    setController({
+      page: 0,
+      rowsPerPage: controller.rowsPerPage,
+      search,
+      role: value !== 'All' ? value : '',
+      status: filterStatus !== 'All' ? filterStatus?.toLowerCase() : '',
     });
+  };
+
+  //   const handleFilterStatus = (val) => {
+  //     setFilterStatus(val);
+  //     setController({
+  //       page: 0,
+  //       rowsPerPage: controller.rowsPerPage,
+  //       search,
+  //       role: filterRole !== 'All' ? filterRole : '',
+  //       status: val !== 'All' ? val?.toLowerCase() : '',
+  //     });
+  //   };
+
+  const handleDetailRow = (id) => {
+    navigate(`/dashboard/subscription/${paramCase(id)}/detail`);
   };
 
   return (
     <>
-      <Page title="Plan: List">
+      <Page title="Subscription List">
         <Container maxWidth={themeStretch ? false : 'xl'}>
           <Card>
             <Typography variant="h6" mx={1}>
-              Plan
+              Subscription
             </Typography>
 
             <Stack
@@ -140,16 +153,15 @@ export default function LibraryCategory() {
               mb={{ xs: 2, sm: 0 }}
             >
               <div style={{ minWidth: '40%' }}>
-                <PlanTableToolbar filterName={search} onFilterName={handleSearch} onEnter={handleOnKeyPress} />
+                <SubscriptionTableToolbar
+                  filterName={search}
+                  onFilterName={handleSearch}
+                  filterRole={filterRole}
+                  onFilterRole={handleFilterRole}
+                  optionsRole={ROLE_OPTIONS}
+                  onEnter={handleOnKeyPress}
+                />
               </div>
-              <Button
-                variant="contained"
-                startIcon={<Iconify icon="eva:plus-fill" />}
-                component={RouterLink}
-                to={'/dashboard/plan/new'}
-              >
-                New Plan
-              </Button>
             </Stack>
 
             <Scrollbar>
@@ -161,12 +173,7 @@ export default function LibraryCategory() {
                     {!isLoading ? (
                       <>
                         {tableData?.docs?.map((row) => (
-                          <PlanTableRow
-                            key={row._id}
-                            row={row}
-                            onEditRow={() => handleEditRow(row._id)}
-                            onDeleteRow={() => handleDialog(row._id)}
-                          />
+                          <SubscriptionTableRow key={row._id} row={row} onDetailRow={() => handleDetailRow(row._id)} />
                         ))}
 
                         <TableNoData isNotFound={tableData?.docs?.length === 0} />
@@ -181,9 +188,9 @@ export default function LibraryCategory() {
 
             <Box sx={{ position: 'relative' }}>
               <TablePagination
-                rowsPerPageOptions={[1, 5, 10, 25]}
+                rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={Number(tableData?.totalPages || 0)}
+                count={Number(tableData?.totalDocs || 0)}
                 rowsPerPage={controller.rowsPerPage}
                 page={controller.page}
                 onPageChange={handlePageChange}
@@ -199,8 +206,6 @@ export default function LibraryCategory() {
           </Card>
         </Container>
       </Page>
-
-      <ConfirmDelete open={open} onClose={handleDialog} onDelete={handleDelete} isLoading={remove.isLoading} />
     </>
   );
 }

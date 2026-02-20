@@ -27,9 +27,6 @@ import {
   DialogActions,
   Select,
   MenuItem,
-  TableHead,
-  TableRow,
-  TableCell,
   TextField,
   InputAdornment,
 } from '@mui/material';
@@ -44,9 +41,9 @@ import Scrollbar from '../../../components/Scrollbar';
 import Label from '../../../components/Label';
 import { TableHeadCustom, TableNoData, TableLoading } from '../../../components/table';
 import ConfirmDelete from '../../../components/ConfirmDelete';
-import TenantInvoiceTableRow from './TenantInvoiceTableRow';
 // utils
-import { formatDate2 } from '../../../utils/getData';
+import { formatDate, formatDate2 } from '../../../utils/getData';
+import { fCurrency } from '../../../utils/formatNumber';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // schema
@@ -54,18 +51,19 @@ import schema from '../schema';
 import accountSchema from '../schema/account';
 // service
 import useService from '../service/useService';
-import TenantTableHistoryToolbar from './TenantTableHistoryToolbar';
+import TenantInvoiceTableToolbar from './TenantInvoiceTableToolbar';
+import TenantInvoiceTableRow from './TenantInvoiceTableRow';
 import TenantLogTableRow from './TenantLogTableRow';
 
 // ----------------------------------------------------------------------
 const INVOICE_THEAD = [
-  { id: 'no', label: 'No', align: 'center' },
-  { id: 'payment.paidAt', label: 'Transaction Date', align: 'left' },
-  { id: 'purchases', label: 'Purchases', align: 'left' },
-  { id: 'billingPeriod', label: 'Billing Period', align: 'center' },
-  { id: 'total', label: 'Total', align: 'center' },
-  { id: 'paymentMethod', label: 'Payment Method', align: 'center' },
-  { id: 'paymentStatus', label: 'Payment Status', align: 'center' },
+  { id: '', label: 'No', align: 'center' },
+  { id: '', label: 'Transaction Date', align: 'left' },
+  { id: '', label: 'Invoice ID', align: 'left' },
+  { id: '', label: 'Subscription Plan', align: 'center' },
+  { id: '', label: 'Total', align: 'center' },
+  { id: '', label: 'Payment Method', align: 'center' },
+  { id: '', label: 'Payment Status', align: 'center' },
 ];
 
 const LOG_THEAD = [
@@ -336,6 +334,49 @@ function TenantInformationTab() {
 }
 
 function CurrentSubscriptionTab() {
+  const { id = '' } = useParams();
+  const { getById } = useService();
+  const { data: dataSubs, isLoading: loadingSubs } = getById(id);
+
+  // Helper function untuk menghitung sisa hari
+  const calculateDaysRemaining = (expiryDate) => {
+    if (!expiryDate) return null;
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const diffTime = expiry - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const subsColor = (val = '') => {
+    switch (val) {
+      case 'active':
+        return 'success';
+      case 'trial':
+        return 'warning';
+      case 'expired':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
+  const InfoRow = ({ label = 'Label', value = '', valueVariant = 'subtitle1', valueColor = 'inherit' }) => {
+    return (
+      <Stack>
+        <Typography variant="subtitle2" color="text.secondary">
+          {label}
+        </Typography>
+        {loadingSubs ? (
+          <Skeleton variant="text" width="200px" height="20px" />
+        ) : (
+          <Typography variant={valueVariant} color={valueColor} sx={{ textTransform: 'capitalize' }}>
+            {value}
+          </Typography>
+        )}
+      </Stack>
+    );
+  };
   return (
     <Box sx={{ p: 1 }}>
       <Grid container spacing={3}>
@@ -352,37 +393,56 @@ function CurrentSubscriptionTab() {
           >
             {/* LEFT CONTENT */}
             <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                Subscription Plan
-              </Typography>
-
-              <Typography variant="h6" sx={{ mt: 0.5 }}>
-                Basic · Monthly
-              </Typography>
+              <InfoRow
+                label="Subscription Plan"
+                value={`${dataSubs?.subsRef?.serviceName || 'TRIAL'} ${
+                  dataSubs?.subsRef?.subsType && dataSubs?.subsRef?.subsType !== 'trial'
+                    ? `- ${dataSubs?.subsRef?.subsType}`
+                    : ''
+                }`}
+                valueVariant="h6"
+                valueColor="primary"
+              />
 
               <Stack spacing={1} mt={2}>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Icon icon="mdi:calendar-range-outline" width={18} />
-                  <Typography variant="body2" color="text.secondary">
-                    1 Jan 2025 – 31 Jan 2025
-                  </Typography>
+                  {loadingSubs ? (
+                    <Skeleton variant="text" width="170px" height="20px" />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {formatDate(dataSubs?.subsRef?.startDate)} - {formatDate(dataSubs?.subsRef?.endDate)}
+                    </Typography>
+                  )}
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Icon icon="mdi:timer-sand" width={18} />
-                  <Typography variant="body2" color="text.secondary">
-                    10 days remaining
-                  </Typography>
-                  <Tooltip title="This subscription will expire soon" arrow>
-                    <Icon icon="simple-line-icons:info" width={18} />
-                  </Tooltip>
+                  {loadingSubs ? (
+                    <Skeleton variant="text" width="170px" height="20px" />
+                  ) : (
+                    <>
+                      <Typography variant="body2" color="text.secondary">
+                        {calculateDaysRemaining(dataSubs?.subsRef?.endDate) > 0
+                          ? `${calculateDaysRemaining(dataSubs?.subsRef?.endDate)} hari tersisa`
+                          : 'Subscription berakhir'}
+                      </Typography>
+                      <Tooltip title="This subscription will expire soon" arrow>
+                        <Icon icon="simple-line-icons:info" width={18} />
+                      </Tooltip>
+                    </>
+                  )}
                 </Stack>
               </Stack>
             </Box>
 
             {/* RIGHT STATUS */}
-            <Label variant="ghost" color="success" sx={{ textTransform: 'capitalize', mt: 0.5 }}>
-              Active
+            <Label
+              variant="ghost"
+              color={subsColor(dataSubs?.subsRef?.status)}
+              sx={{ textTransform: 'capitalize', mt: 0.5 }}
+            >
+              {dataSubs?.subsRef?.status}
             </Label>
           </Card>
         </Grid>
@@ -662,6 +722,7 @@ function SubscriptionHistoryTab() {
   const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
   const [statusPayment, setStatusPayment] = useState('allStatusPayment');
   const [openDetail, setOpenDetail] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
 
   const [controller, setController] = useState({
     page: 0,
@@ -693,13 +754,13 @@ function SubscriptionHistoryTab() {
     });
   };
 
-  const handleClickDetail = (data) => {
-    console.log(data);
+  const handleClickDetail = (val) => {
+    setSelectedData(val);
     setOpenDetail(true);
   };
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} md={6}>
           <Stack direction="row" spacing={2}>
@@ -719,7 +780,7 @@ function SubscriptionHistoryTab() {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <TenantTableHistoryToolbar filterName={''} onFilterName={() => {}} onEnter={() => {}} />
+          <TenantInvoiceTableToolbar filterName={''} onFilterName={() => {}} onEnter={() => {}} />
         </Grid>
       </Grid>
 
@@ -737,8 +798,8 @@ function SubscriptionHistoryTab() {
                         key={row._id}
                         row={row}
                         number={index + 1}
-                        onClick={(data) => {
-                          handleClickDetail(data);
+                        onDetailRow={() => {
+                          handleClickDetail(row);
                         }}
                       />
                     ))}
@@ -774,7 +835,7 @@ function SubscriptionHistoryTab() {
               Kode Transaksi
             </Typography>
             <Typography variant="h5" fontWeight={700} color="primary">
-              SBSC2024000057RE
+              {selectedData?.invoiceId}
             </Typography>
           </Box>
 
@@ -786,39 +847,53 @@ function SubscriptionHistoryTab() {
 
             <Grid container spacing={2}>
               <Grid item xs={12} md={3}>
-                <Typography variant="caption" color="text.secondary">
-                  User
+                <Typography variant="body2" color="text.secondary">
+                  Tenant ID
                 </Typography>
-                <Typography>Jane Doe</Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.tenantId}</Typography>
               </Grid>
 
               <Grid item xs={12} md={3}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Pemesan
                 </Typography>
-                <Typography>Jane Doe</Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.ownerName}</Typography>
               </Grid>
 
               <Grid item xs={12} md={3}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
+                  Nama Usaha
+                </Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.businessName}</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <Typography variant="body2" color="text.secondary">
+                  Bidang Usaha
+                </Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.businessType}</Typography>
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <Typography variant="body2" color="text.secondary">
                   Email
                 </Typography>
-                <Typography>janedoe123@gmail.com</Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.email}</Typography>
               </Grid>
 
               <Grid item xs={12} md={3}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Telepon
                 </Typography>
-                <Typography>628122334455</Typography>
+                <Typography variant="body2">{selectedData?.tenantRef?.phone}</Typography>
               </Grid>
 
-              <Grid item xs={12}>
-                <Typography variant="caption" color="text.secondary">
-                  Alamat
-                </Typography>
-                <Typography>Surakarta, Indonesia</Typography>
-              </Grid>
+              {/* <Grid item xs={12}>
+                      <Typography variant="body2" color="text.secondary">
+                        Alamat
+                      </Typography>
+                      <Typography variant="body2">Surakarta, Indonesia</Typography>
+                    </Grid> */}
             </Grid>
           </Card>
 
@@ -828,56 +903,118 @@ function SubscriptionHistoryTab() {
               Detail Pembelian
             </Typography>
 
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nama Outlet</TableCell>
-                  <TableCell>Tanggal</TableCell>
-                  <TableCell>Nama Paket</TableCell>
-                  <TableCell>Jumlah</TableCell>
-                  <TableCell align="right">Harga</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Jane Business</TableCell>
-                  <TableCell>29 Apr 2024 11.44</TableCell>
-                  <TableCell>Trial</TableCell>
-                  <TableCell>30 Hari</TableCell>
-                  <TableCell align="right">Rp0</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={3}>
+                <Stack gap={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Produk
+                  </Typography>
+                  <Typography variant="body2">{selectedData?.serviceName || '-'}</Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Stack gap={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Status Langganan
+                  </Typography>
+                  <Typography variant="body2">
+                    Aktif dari : {selectedData?.startDate ? formatDate(selectedData?.startDate) : '-'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Berakhir pada : {selectedData?.endDate ? formatDate(selectedData?.endDate) : '-'}
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Stack gap={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Durasi
+                  </Typography>
+                  <Stack flexDirection="row" alignItems="center" gap={4}>
+                    <Typography variant="body2">
+                      {selectedData?.qty || 1} {selectedData?.subsType === 'monthly' ? 'Bulan' : 'Tahun'}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Stack gap={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Harga
+                  </Typography>
+                  <Typography variant="body2">
+                    {fCurrency((selectedData?.qty || 1) * (selectedData?.price || 0))}
+                  </Typography>
+                </Stack>
+              </Grid>
+            </Grid>
           </Card>
 
           {/* TOTAL TAGIHAN */}
           <Card sx={{ p: 3 }}>
-            <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">TOTAL TAGIHAN</Typography>
-              <Typography variant="h6" fontWeight={700}>
-                Rp0
-              </Typography>
-            </Box>
+            <Typography variant="h6" mb={2}>
+              Rincian
+            </Typography>
 
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Typography variant="caption" color="text.secondary">
-                  Metode Pembayaran
+            <Stack flexDirection="column" gap={1}>
+              <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                <Typography variant="body2">Biaya Langganan</Typography>
+                <Typography variant="subtitle2">
+                  {fCurrency((selectedData?.qty || 1) * (selectedData?.price || 0))}
                 </Typography>
-                <Typography>Credit Card</Typography>
-              </Grid>
+              </Stack>
+              <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                <Typography variant="body2">Diskon</Typography>
+                <Typography variant="subtitle2">{fCurrency(selectedData?.discount || 0)}</Typography>
+              </Stack>
+              <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                <Typography variant="body2">Biaya Admin</Typography>
+                <Typography variant="subtitle2">{fCurrency(selectedData?.adminFee || 0)}</Typography>
+              </Stack>
+              <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                <Typography variant="body2">PPN 11%</Typography>
+                <Typography variant="subtitle2">{fCurrency(selectedData?.tax || 0)}</Typography>
+              </Stack>
+              <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                <Typography variant="h6" color="primary">
+                  Total Tagihan
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  {fCurrency(selectedData?.billedAmount || 0)}
+                </Typography>
+              </Stack>
 
-              <Grid item xs={12} md={6} textAlign="right">
-                <Typography variant="caption" color="text.secondary">
-                  Status
-                </Typography>
-                <Box mt={1}>
-                  <Label variant="ghost" color="success" sx={{ textTransform: 'capitalize' }}>
-                    Success
+              <Stack gap={1}>
+                <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Metode Pembayaran
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Status
+                  </Typography>
+                </Stack>
+                <Stack flexDirection="row" justifyContent="space-between" gap={1}>
+                  <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
+                    {selectedData?.payment?.channel || '-'}
+                  </Typography>
+                  <Label
+                    variant="ghost"
+                    color={
+                      selectedData?.status === 'paid'
+                        ? 'success'
+                        : selectedData?.status === 'unpaid'
+                        ? 'warning'
+                        : selectedData?.status === 'canceled'
+                        ? 'error'
+                        : 'warning'
+                    }
+                    sx={{ textTransform: 'capitalize' }}
+                  >
+                    {selectedData?.status}
                   </Label>
-                </Box>
-              </Grid>
-            </Grid>
+                </Stack>
+              </Stack>
+            </Stack>
           </Card>
         </DialogContent>
 
@@ -928,7 +1065,7 @@ function ActivityLogTab() {
   };
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box mt={2.5}>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} md={4}>
           <Stack direction="row" spacing={2}>

@@ -9,8 +9,9 @@ import { formatDate2, numberWithCommas } from '../../../utils/getData';
 
 // ----------------------------------------------------------------------
 
-TenantInvoiceTableRow.propTypes = {
+SubscriptionInvoiceTableRow.propTypes = {
   row: PropTypes.object,
+  number: PropTypes.number,
   onDetailRow: PropTypes.func,
 };
 
@@ -21,10 +22,10 @@ const CustomTableRow = styled(TableRow)(() => ({
   },
 }));
 
-export default function TenantInvoiceTableRow({ row, number, onDetailRow }) {
+export default function SubscriptionInvoiceTableRow({ row, number, onDetailRow }) {
   const theme = useTheme();
 
-  const { invoiceId, createdAt, billedAmount, status, payment, serviceRef } = row;
+  const { invoiceId, createdAt, serviceName, billedAmount, status, payment } = row;
 
   const statusColor = (val = '') => {
     switch (val) {
@@ -41,7 +42,7 @@ export default function TenantInvoiceTableRow({ row, number, onDetailRow }) {
     <CustomTableRow hover>
       <TableCell align="center">{numberWithCommas(number)}</TableCell>
 
-      <TableCell align="left">{payment?.paidAt ? formatDate2(payment?.paidAt) : '-'}</TableCell>
+      <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
       <TableCell align="left">
         <Link component="button" variant="subtitle2" underline="hover" onClick={() => onDetailRow()}>
@@ -49,9 +50,11 @@ export default function TenantInvoiceTableRow({ row, number, onDetailRow }) {
         </Link>
       </TableCell>
 
-      <TableCell align="center">{serviceRef?.name || 'TRIAL'}</TableCell>
+      <TableCell align="left">{serviceName || 'TRIAL'}</TableCell>
 
       <TableCell align="center">Rp. {numberWithCommas(billedAmount || 0)}</TableCell>
+
+      <TableCell align="center">{payment?.paidAt ? formatDate2(payment?.paidAt) : '-'}</TableCell>
 
       <TableCell align="center" sx={{ textTransform: 'capitalize' }}>
         {payment?.channel || '-'}

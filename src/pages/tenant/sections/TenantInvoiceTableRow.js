@@ -23,7 +23,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 export default function TenantInvoiceTableRow({ row }) {
   const theme = useTheme();
 
-  const { invoiceId, createdAt, amount, status, payment, serviceRef } = row;
+  const { invoiceId, createdAt, billedAmount, status, payment, serviceRef } = row;
 
   const statusColor = (val = '') => {
     switch (val) {
@@ -60,7 +60,7 @@ export default function TenantInvoiceTableRow({ row }) {
         </Label>
       </TableCell>
 
-      <TableCell align="center">Rp. {numberWithCommas(amount)}</TableCell>
+      <TableCell align="center">Rp. {numberWithCommas(billedAmount)}</TableCell>
     </CustomTableRow>
   );
 }

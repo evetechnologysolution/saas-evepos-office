@@ -5,21 +5,21 @@ import Iconify from '../../../components/Iconify';
 
 // ----------------------------------------------------------------------
 
-TenantTableHistoryToolbar.propTypes = {
+SubscriptionInvoiceTableToolbar.propTypes = {
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
   onEnter: PropTypes.func,
 };
 
-export default function TenantTableHistoryToolbar({ filterName, onFilterName, onEnter }) {
+export default function SubscriptionInvoiceTableToolbar({ filterName, onFilterName, onEnter }) {
   return (
-    <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ py: 2.5, px: 1 }}>
+    <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ py: 2.5 }}>
       <TextField
         fullWidth
         value={filterName}
         onChange={(event) => onFilterName(event.target.value)}
         onKeyDown={onEnter}
-        placeholder="Search order id or purchases..."
+        placeholder="Search Invoice..."
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">

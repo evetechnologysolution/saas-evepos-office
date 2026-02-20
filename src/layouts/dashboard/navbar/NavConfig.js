@@ -54,6 +54,12 @@ export const useNavConfig = () => {
           icon: ICONS.setting,
           roles: ['super admin', 'admin'],
         },
+        {
+          title: 'subscription',
+          path: '/dashboard/subscription',
+          icon: ICONS.setting,
+          roles: ['super admin', 'admin'],
+        },
       ],
     },
 
