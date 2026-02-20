@@ -30,6 +30,9 @@ export default function ConfirmDialog({
       fullWidth
     >
       <DialogTitle sx={{ padding: '24px 24px 16px' }}>{title}</DialogTitle>
+      <DialogContent sx={{ padding: '0px 24px' }}>
+        <DialogContentText>{text}</DialogContentText>
+      </DialogContent>
       <DialogActions>
         <LoadingButton variant="contained" loading={isLoading} onClick={() => onClick()}>
           Yes
@@ -38,9 +41,6 @@ export default function ConfirmDialog({
           Cancel
         </Button>
       </DialogActions>
-      <DialogContent sx={{ padding: '0px 24px' }}>
-        <DialogContentText>{text}</DialogContentText>
-      </DialogContent>
     </Dialog>
   );
 }
