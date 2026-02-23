@@ -88,25 +88,34 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('body', data.body);
-    formData.append('status', data.status);
-    formData.append('module', data.module);
-    if (data.reply) {
-      formData.append('reply', data.reply);
-    }
-    if (data.attachment) {
-      formData.append('attachment', data.attachment);
+
+    if (!isEdit) {
+      formData.append('title', data.title);
+      formData.append('body', data.body);
+      formData.append('status', data.status);
+      formData.append('module', data.module);
+
+      if (data.attachment) {
+        formData.append('attachment', data.attachment);
+      }
+    } else {
+      if (data.message?.text) {
+        formData.append('message', JSON.stringify(data.message));
+      }
+
+      formData.append('status', data.status);
     }
 
     const mutation = isEdit
       ? update.mutateAsync({ id: currentData._id, payload: formData })
       : create.mutateAsync(formData);
 
+    const navigateTo = isEdit ? navigate(`/dashboard/ticket/${currentData._id}/edit`) : navigate('/dashboard/ticket');
+
     await handleMutationFeedback(mutation, {
-      successMsg: isEdit ? 'Tiket berhasil diperbarui!' : 'Tiket berhasil dibuat!',
+      successMsg: isEdit ? 'Balasan berhasil dikirim!' : 'Tiket berhasil dibuat!',
       errorMsg: 'Gagal menyimpan tiket!',
-      onSuccess: () => navigate('/dashboard/ticket'),
+      onSuccess: () => navigateTo,
       enqueueSnackbar,
     });
   };
@@ -141,7 +150,7 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
   const editAndView = isEdit || type === 'view';
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Card sx={{ p: 3 }}>
@@ -392,7 +401,7 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
                   </Box>
                   <Box sx={{ p: 2 }}>
                     <RHFTextField
-                      name="reply"
+                      name="message.text"
                       label="Respon dari time evepos"
                       placeholder="Masukkan feedback atau balasan untuk tiket ini..."
                       multiline
@@ -415,18 +424,16 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
               <Button variant="outlined" color="inherit" onClick={() => navigate('/dashboard/ticket')}>
                 Batal
               </Button>
-              {!editAndView ? (
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  loading={isSubmitting}
-                  startIcon={
-                    !isSubmitting && <Iconify icon={isEdit ? 'eva:save-outline' : 'eva:plus-circle-outline'} />
-                  }
-                >
-                  {isEdit ? 'Simpan Perubahan' : 'Buat Tiket'}
-                </LoadingButton>
-              ) : null}
+              {/* {isEdit ? ( */}
+              <LoadingButton
+                type="submit"
+                variant="contained"
+                loading={isSubmitting}
+                startIcon={!isSubmitting && <Iconify icon={isEdit ? 'eva:save-outline' : 'eva:plus-circle-outline'} />}
+              >
+                {isEdit ? 'Simpan Perubahan' : 'Buat Tiket'}
+              </LoadingButton>
+              {/* ) : null} */}
             </Stack>
           </Card>
         </Grid>
@@ -500,6 +507,100 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
                 ))}
               </Stack>
             </Card>
+
+            {/* Bubble Chat */}
+            {editAndView && currentData?.messages?.length > 0 && (
+              <Card sx={{ p: 2.5 }}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                  <Iconify icon="eva:message-circle-outline" sx={{ color: 'primary.main', width: 18, height: 18 }} />
+                  <Typography variant="subtitle2" color="primary.main">
+                    Percakapan
+                  </Typography>
+                  <Box
+                    sx={{
+                      ml: 'auto',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: 10,
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    }}
+                  >
+                    <Typography variant="caption" fontWeight={700} color="primary.main">
+                      {currentData.messages.length}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Stack
+                  spacing={1.5}
+                  sx={{
+                    maxHeight: 360,
+                    overflowY: 'auto',
+                    pr: 0.5,
+                    '&::-webkit-scrollbar': { width: 4 },
+                    '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+                    '&::-webkit-scrollbar-thumb': {
+                      bgcolor: alpha(theme.palette.text.primary, 0.1),
+                      borderRadius: 2,
+                    },
+                  }}
+                >
+                  {currentData.messages.map((msg) => {
+                    const isAdmin = msg.isAdmin;
+                    return (
+                      <Box
+                        key={msg._id}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: isAdmin ? 'flex-start' : 'flex-end',
+                        }}
+                      >
+                        <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5, mx: 0.5 }}>
+                          {isAdmin ? 'Admin' : 'Tenant'}
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            maxWidth: '85%',
+                            px: 1.75,
+                            py: 1.25,
+                            borderRadius: isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px',
+                            bgcolor: isAdmin
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : alpha(theme.palette.success.main, 0.1),
+                            border: `1px solid ${
+                              isAdmin ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.success.main, 0.2)
+                            }`,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: isAdmin ? 'primary.dark' : 'success.dark',
+                              wordBreak: 'break-word',
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {msg.text}
+                          </Typography>
+                        </Box>
+
+                        <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, mx: 0.5 }}>
+                          {new Date(msg.createdAt).toLocaleString('id-ID', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Card>
+            )}
           </Stack>
         </Grid>
       </Grid>
