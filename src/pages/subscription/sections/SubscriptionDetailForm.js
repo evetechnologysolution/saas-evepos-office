@@ -187,10 +187,10 @@ function SubscriptionHistoryTab() {
   const { listInvoice } = useService();
   const { id = '' } = useParams();
 
-  const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
-  const [statusPayment, setStatusPayment] = useState('allStatusPayment');
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   const [controller, setController] = useState({
     page: 0,
@@ -203,6 +203,7 @@ function SubscriptionHistoryTab() {
     page: controller.page + 1,
     perPage: controller.rowsPerPage,
     search: controller.search,
+    status: controller.status !== 'all' ? controller.status : '',
     subscription: id,
   });
 
@@ -221,6 +222,32 @@ function SubscriptionHistoryTab() {
     });
   };
 
+  const handleSearch = (value) => {
+    setSearch(value);
+  };
+
+  const handleFilterStatus = (event) => {
+    const { value } = event.target;
+    setFilterStatus(value);
+    setController({
+      page: 0,
+      rowsPerPage: controller.rowsPerPage,
+      search,
+      status: value !== 'all' ? value?.toLowerCase() : '',
+    });
+  };
+
+  const handleOnKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      setController({
+        page: 0,
+        rowsPerPage: controller.rowsPerPage,
+        search: search !== '' ? search : '',
+        status: filterStatus !== 'all' ? filterStatus?.toLowerCase() : '',
+      });
+    }
+  };
+
   const handleClickDetail = (val) => {
     setSelectedData(val);
     setOpenDetail(true);
@@ -228,28 +255,14 @@ function SubscriptionHistoryTab() {
 
   return (
     <Box>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} md={6}>
-          <Stack direction="row" spacing={2}>
-            <Select fullWidth value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-              <MenuItem value="allPaymentMethod">All Payment Method</MenuItem>
-              <MenuItem value="creditCard">Credit Card</MenuItem>
-              <MenuItem value="virtualAccount">Virtual Account</MenuItem>
-              <MenuItem value="linkPayment">Link Payment</MenuItem>
-            </Select>
-
-            <Select fullWidth value={statusPayment} onChange={(e) => setStatusPayment(e.target.value)}>
-              <MenuItem value="allStatusPayment">All Status</MenuItem>
-              <MenuItem value="success">Success</MenuItem>
-              <MenuItem value="canceled">Canceled</MenuItem>
-            </Select>
-          </Stack>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <SubscriptionInvoiceTableToolbar filterName={''} onFilterName={() => {}} onEnter={() => {}} />
-        </Grid>
-      </Grid>
+      <SubscriptionInvoiceTableToolbar
+        filterSearch={search}
+        onFilterSearch={handleSearch}
+        optionsStatus={['all', 'paid', 'unpaid']}
+        filterStatus={filterStatus}
+        onFilterStatus={handleFilterStatus}
+        onEnter={handleOnKeyPress}
+      />
 
       <Box>
         <Scrollbar>

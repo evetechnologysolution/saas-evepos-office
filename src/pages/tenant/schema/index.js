@@ -5,7 +5,7 @@ const userSchema = Yup.object({
     .transform((val) => (val === '' ? null : val))
     .nullable()
     .optional()
-    .default(null),
+    .default(''),
   tenantId: Yup.string().default(''),
   ownerName: Yup.string().required('wajib diisi').default(''),
   businessName: Yup.string().required('wajib diisi').default(''),
@@ -18,7 +18,8 @@ const userSchema = Yup.object({
     .required('wajib diisi')
     .matches(/^\d+$/, 'Nomor hanya boleh berisi angka')
     .min(10, 'Minimal 10 digit')
-    .max(15, 'Maksimal 15 digit'),
+    .max(15, 'Maksimal 15 digit')
+    .default(''),
   email: Yup.string().required('wajib diisi').default(''),
   address: Yup.string().default(''),
   province: Yup.string().default(''),

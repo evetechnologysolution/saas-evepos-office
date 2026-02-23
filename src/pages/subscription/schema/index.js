@@ -5,7 +5,7 @@ const userSchema = Yup.object({
     .transform((val) => (val === '' ? null : val))
     .nullable()
     .optional()
-    .default(null),
+    .default(''),
   tenantId: Yup.string().default(''),
   ownerName: Yup.string().required('wajib diisi').default(''),
   businessName: Yup.string().required('wajib diisi').default(''),

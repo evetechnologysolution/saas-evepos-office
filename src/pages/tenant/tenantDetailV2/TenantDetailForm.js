@@ -25,18 +25,18 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Select,
   MenuItem,
   TextField,
   InputAdornment,
+  Slide,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Icon } from '@iconify/react';
 import { FormProvider, RHFSelect, RHFTextField } from 'src/components/hook-form';
 import numberWithCommas from 'src/utils/numberWithCommas';
-import Slide from '@mui/material/Slide';
-import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import Iconify from '../../../components/Iconify';
 import Scrollbar from '../../../components/Scrollbar';
 import Label from '../../../components/Label';
 import { TableHeadCustom, TableNoData, TableLoading } from '../../../components/table';
@@ -719,11 +719,10 @@ function SubscriptionHistoryTab() {
   const { listInvoice } = useService();
   const { id = '' } = useParams();
 
-  const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
-  const [statusPayment, setStatusPayment] = useState('allStatusPayment');
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -736,6 +735,7 @@ function SubscriptionHistoryTab() {
     page: controller.page + 1,
     perPage: controller.rowsPerPage,
     search: controller.search,
+    status: controller.status !== 'all' ? controller.status : '',
     tenant: id,
   });
 
@@ -754,6 +754,32 @@ function SubscriptionHistoryTab() {
     });
   };
 
+  const handleSearch = (value) => {
+    setSearch(value);
+  };
+
+  const handleFilterStatus = (event) => {
+    const { value } = event.target;
+    setFilterStatus(value);
+    setController({
+      page: 0,
+      rowsPerPage: controller.rowsPerPage,
+      search,
+      status: value !== 'all' ? value?.toLowerCase() : '',
+    });
+  };
+
+  const handleOnKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      setController({
+        page: 0,
+        rowsPerPage: controller.rowsPerPage,
+        search: search !== '' ? search : '',
+        status: filterStatus !== 'all' ? filterStatus?.toLowerCase() : '',
+      });
+    }
+  };
+
   const handleClickDetail = (val) => {
     setSelectedData(val);
     setOpenDetail(true);
@@ -761,29 +787,14 @@ function SubscriptionHistoryTab() {
 
   return (
     <Box>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} md={6}>
-          <Stack direction="row" spacing={2}>
-            <Select fullWidth value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-              <MenuItem value="allPaymentMethod">All Payment Method</MenuItem>
-              <MenuItem value="creditCard">Credit Card</MenuItem>
-              <MenuItem value="virtualAccount">Virtual Account</MenuItem>
-              <MenuItem value="linkPayment">Link Payment</MenuItem>
-            </Select>
-
-            <Select fullWidth value={statusPayment} onChange={(e) => setStatusPayment(e.target.value)}>
-              <MenuItem value="allStatusPayment">All Status</MenuItem>
-              <MenuItem value="success">Success</MenuItem>
-              <MenuItem value="canceled">Canceled</MenuItem>
-            </Select>
-          </Stack>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <TenantInvoiceTableToolbar filterName={''} onFilterName={() => {}} onEnter={() => {}} />
-        </Grid>
-      </Grid>
-
+      <TenantInvoiceTableToolbar
+        filterSearch={search}
+        onFilterSearch={handleSearch}
+        optionsStatus={['all', 'paid', 'unpaid']}
+        filterStatus={filterStatus}
+        onFilterStatus={handleFilterStatus}
+        onEnter={handleOnKeyPress}
+      />
       <Box>
         <Scrollbar>
           <TableContainer sx={{ minWidth: 980, position: 'relative' }}>
@@ -1029,14 +1040,14 @@ function SubscriptionHistoryTab() {
 }
 
 function ActivityLogTab() {
-  const [paymentMethod, setPaymentMethod] = useState('allPaymentMethod');
-  const [topStartDate, setTopStartDate] = useState(null);
-  const [topEndDate, setTopEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [ctrlLog, setCtrlLog] = useState({
     page: 0,
     rowsPerPage: 10,
     search: '',
-    status: '',
+    start: '',
+    end: '',
   });
 
   const { id = '' } = useParams();
@@ -1046,6 +1057,8 @@ function ActivityLogTab() {
     page: ctrlLog.page + 1,
     perPage: ctrlLog.rowsPerPage,
     search: ctrlLog.search,
+    start: ctrlLog?.start || '',
+    end: ctrlLog?.end || '',
     tenant: id,
   });
 
@@ -1064,73 +1077,96 @@ function ActivityLogTab() {
     });
   };
 
+  const handleReset = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setCtrlLog((prev) => ({
+      ...prev,
+      start: '',
+      end: '',
+    }));
+  };
+
   return (
-    <Box mt={2.5}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} md={4}>
-          <Stack direction="row" spacing={2}>
-            <Select fullWidth value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-              <MenuItem value="allPaymentMethod">All Payment Method</MenuItem>
-              <MenuItem value="creditCard">Credit Card</MenuItem>
-              <MenuItem value="virtualAccount">Virtual Account</MenuItem>
-              <MenuItem value="linkPayment">Link Payment</MenuItem>
-            </Select>
-          </Stack>
-        </Grid>
+    <Box>
+      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} sx={{ py: 2.5 }}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <MobileDatePicker
+            label="Start Date"
+            inputFormat="dd/MM/yyyy"
+            value={startDate}
+            onChange={(newValue) => {
+              setStartDate(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <img src="/assets/calender-icon.svg" alt="icon" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  maxWidth: { sm: 240 },
+                }}
+              />
+            )}
+          />
+        </LocalizationProvider>
 
-        <Grid item xs={12} md={4} sm="auto">
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <MobileDatePicker
-              label="Start Date"
-              inputFormat="dd/MM/yyyy"
-              value={topStartDate}
-              onChange={(newValue) => {
-                setTopStartDate(newValue);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <img src="/assets/calender-icon.svg" alt="icon" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </LocalizationProvider>
-        </Grid>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <MobileDatePicker
+            label="End Date"
+            inputFormat="dd/MM/yyyy"
+            value={endDate}
+            onChange={(newValue) => {
+              setEndDate(newValue);
+            }}
+            onAccept={(newValue) => {
+              if (startDate && newValue) {
+                setCtrlLog((prev) => ({
+                  ...prev,
+                  start: startDate,
+                  end: newValue,
+                }));
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <img src="/assets/calender-icon.svg" alt="icon" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  maxWidth: { sm: 240 },
+                }}
+              />
+            )}
+          />
+        </LocalizationProvider>
 
-        <Grid item xs={12} md={4} sm="auto">
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <MobileDatePicker
-              label="End Date"
-              inputFormat="dd/MM/yyyy"
-              value={topEndDate}
-              onChange={(newValue) => {
-                setTopEndDate(newValue);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <img src="/assets/calender-icon.svg" alt="icon" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </LocalizationProvider>
-        </Grid>
-      </Grid>
-      <Box sx={{ mt: 3 }}>
+        <Box>
+          <Button
+            variant="contained"
+            color="warning"
+            sx={{ color: 'white' }}
+            size="small"
+            title="Reset"
+            onClick={() => handleReset()}
+          >
+            <Iconify icon={'mdi:reload'} sx={{ width: 25, height: 25 }} />
+          </Button>
+        </Box>
+      </Stack>
+      <Box>
         <Scrollbar>
           <TableContainer sx={{ minWidth: 980 }}>
             <Table size="small">

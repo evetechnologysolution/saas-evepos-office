@@ -33,7 +33,7 @@ export default function PlanTableRow({ row, onEditRow, onDeleteRow }) {
         <Typography variant="body2">{name}</Typography>
       </TableCell>
 
-      <TableCell align="start">
+      <TableCell>
         <Typography variant="body2" fontWeight={800}>
           Rp {numberWithCommas(price.yearly)}/Year
         </Typography>
@@ -42,7 +42,7 @@ export default function PlanTableRow({ row, onEditRow, onDeleteRow }) {
         </Typography>
       </TableCell>
 
-      <TableCell align="start">
+      <TableCell>
         <Typography variant="body2" fontWeight={800}>
           Rp {numberWithCommas(discount.yearly)}/Year
         </Typography>
