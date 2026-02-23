@@ -110,10 +110,12 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
       ? update.mutateAsync({ id: currentData._id, payload: formData })
       : create.mutateAsync(formData);
 
+    const navigateTo = isEdit ? navigate(`/dashboard/ticket/${currentData._id}/edit`) : navigate('/dashboard/ticket');
+
     await handleMutationFeedback(mutation, {
       successMsg: isEdit ? 'Balasan berhasil dikirim!' : 'Tiket berhasil dibuat!',
       errorMsg: 'Gagal menyimpan tiket!',
-      onSuccess: () => navigate('/dashboard/ticket'),
+      onSuccess: () => navigateTo,
       enqueueSnackbar,
     });
   };
@@ -146,8 +148,6 @@ export default function TicketNewEditForm({ isEdit, currentData, type }) {
 
   const activeStatus = STATUS_OPTIONS.find((s) => s.value === watchedStatus);
   const editAndView = isEdit || type === 'view';
-
-  console.log(currentData?.messages);
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}>
