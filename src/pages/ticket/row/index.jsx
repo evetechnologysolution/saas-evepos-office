@@ -23,7 +23,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 }));
 
 export default function UserTableRow({ row, onEditRow, onDeleteRow }) {
-  const { createdAt, ticketId, title, status, module, _id } = row;
+  const { createdAt, ticketId, title, status, module, _id, user } = row;
   const navigate = useNavigate();
 
   const STATUS_CONFIG = {
@@ -49,6 +49,9 @@ export default function UserTableRow({ row, onEditRow, onDeleteRow }) {
         >
           {ticketId}
         </Link>
+      </TableCell>
+      <TableCell align="left">
+        {user?.tenantRef?.businessName} - {user?.fullname}
       </TableCell>
       <TableCell align="left">{module}</TableCell>
       <TableCell align="left">{title}</TableCell>

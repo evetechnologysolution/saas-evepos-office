@@ -30,12 +30,14 @@ import TableRow from './row';
 // context
 import useTicket from './service/useTicket';
 import TicketToolbar from './toolbar/ticket';
+import TicketStatusCards from './status';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'date', label: 'Date', align: 'center' },
   { id: 'ticketId', label: 'Ticket ID', align: 'left' },
+  { id: 'tenantName', label: 'Tenant', align: 'left' },
   { id: 'module', label: 'Module', align: 'left' },
   { id: 'fullname', label: 'Title', align: 'left' },
   { id: 'username', label: 'Status', align: 'left' },
@@ -152,6 +154,14 @@ export default function UserList() {
                 New Ticket
               </Button> */}
             </Stack>
+
+            <TicketStatusCards
+              counts={{
+                open: tableData?.statusCount?.open,
+                progress: tableData?.statusCount?.progress,
+                closed: tableData?.statusCount?.closed,
+              }}
+            />
 
             <Scrollbar>
               <TableContainer sx={{ minWidth: 980, position: 'relative' }}>
