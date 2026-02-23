@@ -60,6 +60,12 @@ export const useNavConfig = () => {
           icon: ICONS.setting,
           roles: ['super admin', 'admin'],
         },
+        {
+          title: 'Ticket',
+          path: '/dashboard/ticket',
+          icon: ICONS.report,
+          roles: ['super admin', 'admin'],
+        },
       ],
     },
 
