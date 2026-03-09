@@ -11,3 +11,4 @@ export { default as RHFRadioGroup } from './RHFRadioGroup';
 export { default as RHFSelectMultiple } from './RHFSelectMultiple';
 export { default as RHFDaySelect } from './RHFDaySelect';
 export { default as RHFNumberFormat } from './RHFNumberFormat';
+export { default as RHFNumericFormat } from './RHFNumericFormat';
