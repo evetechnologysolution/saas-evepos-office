@@ -79,7 +79,7 @@ export default function MemberList() {
     const [, params] = queryKey; // Extract query params
     const queryString = new URLSearchParams(params).toString(); // Build query string
     try {
-      const res = await axios.get(`/members?${queryString}`);
+      const res = await axios.get(`/member?${queryString}`);
       setCountData(res?.data?.totalDocs || 0);
       return res.data;
     } catch (error) {
@@ -153,7 +153,7 @@ export default function MemberList() {
   const handleDelete = async () => {
     setLoadingDelete(true);
     if (selectedId) {
-      await axios.delete(`/members/${selectedId}`);
+      await axios.delete(`/member/${selectedId}`);
       client.invalidateQueries("listMembers");
       enqueueSnackbar("Delete success!");
     }

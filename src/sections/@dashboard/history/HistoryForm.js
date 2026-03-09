@@ -112,7 +112,7 @@ export default function HistoryForm() {
       setLoading(true);
       setAlert(false);
 
-      const res = await axios.get("/members/track", {
+      const res = await axios.get("/member/track", {
         params: { search }
       });
 
