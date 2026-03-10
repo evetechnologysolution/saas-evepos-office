@@ -17,7 +17,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 
 export default function PointTableRow({ row }) {
 
-  const { createdAt, pointExpiry, point, status, order } = row;
+  const { createdAt, pointExpiry, point, status, orderRef } = row;
 
   return (
     <CustomTableRow hover>
@@ -25,7 +25,7 @@ export default function PointTableRow({ row }) {
 
       <TableCell align="left">
         {status === "in" ? (
-          `Transaksi ${order?.orderId} - ${numberWithCommas(order?.billedAmount || 0)}`
+          `Transaksi ${orderRef?.orderId} - ${numberWithCommas(orderRef?.billedAmount || 0)}`
         ) : (
           "Voucher Redeem"
         )}
