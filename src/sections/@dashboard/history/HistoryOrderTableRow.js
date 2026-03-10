@@ -18,7 +18,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 
 export default function OrderTableRow({ row }) {
 
-  const { date, paymentDate, orderId, orderType, status, billedAmount } = row;
+  const { createdAt, paymentDate, orderId, orderType, status, billedAmount } = row;
 
   let statusColor;
   if (status?.toLowerCase() === "paid") {
@@ -35,7 +35,7 @@ export default function OrderTableRow({ row }) {
 
   return (
     <CustomTableRow hover>
-      <TableCell align="center">{formatDate2(date)}</TableCell>
+      <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
       <TableCell align="center">{paymentDate ? formatDate2(paymentDate) : "-"}</TableCell>
 

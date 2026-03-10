@@ -28,13 +28,13 @@ const CustomTableRow = styled(TableRow)(() => ({
 export default function MemberTableRow({ row, onDetailRow, onEditRow, onDeleteRow }) {
   const { user } = useAuth();
 
-  const { date, memberId, name, phone, email, addresses, point } = row;
+  const { createdAt, memberId, name, phone, email, addresses, point } = row;
 
   const mainAddress = Array.isArray(addresses) ? addresses?.find((item) => item?.isDefault) : null;
 
   return (
     <CustomTableRow hover>
-      <TableCell align="center">{formatDate2(date)}</TableCell>
+      <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
       <TableCell align="center">
         <Link component="button" variant="inherit" underline="hover" onClick={onDetailRow}>
