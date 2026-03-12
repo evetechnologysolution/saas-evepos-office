@@ -148,7 +148,7 @@ export default function HistoryForm() {
   useEffect(() => {
     if (!data?.name) return; // Early return if member ID is not available
 
-    const url = `/orders?page=${controllerOrder.page + 1}&perPage=${controllerOrder.rowsPerPage}&search=${data.phone}`;
+    const url = `/order?page=${controllerOrder.page + 1}&perPage=${controllerOrder.rowsPerPage}&search=${data.phone}`;
     fetchData(url, setOrderData, setCountOrder);
   }, [controllerOrder, data]);
 

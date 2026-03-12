@@ -94,8 +94,8 @@ export default function HistoryForm() {
 
       // Melakukan permintaan API paralel
       const [res1, res2] = await Promise.all([
-        axios.get("/orders/track-count", { params: { start: startDate, end: endDate } }),
-        axios.get("/orders/track", { params: { start: startDate, end: endDate, perPage: 25 } }),
+        axios.get("/order/track-count", { params: { start: startDate, end: endDate } }),
+        axios.get("/order/track", { params: { start: startDate, end: endDate, perPage: 25 } }),
       ]);
 
       // Validasi hasil respons
@@ -124,7 +124,7 @@ export default function HistoryForm() {
   useEffect(() => {
     const getData = async () => {
       try {
-        await axios.get("/orders/track", {
+        await axios.get("/order/track", {
           params: {
             start: startDate,
             end: endDate,
