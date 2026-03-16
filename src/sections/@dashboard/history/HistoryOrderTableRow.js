@@ -25,7 +25,7 @@ export default function OrderTableRow({ row }) {
     statusColor = "success";
   } else if (status?.toLowerCase() === "half paid") {
     statusColor = "secondary";
-  } else if (status?.toLowerCase() === "pending") {
+  } else if (status?.toLowerCase() === "unpaid") {
     statusColor = "warning";
   } else if (status?.toLowerCase() === "refund") {
     statusColor = "default";
@@ -49,7 +49,7 @@ export default function OrderTableRow({ row }) {
 
       <TableCell align="center">
         <Label variant="ghost" color={statusColor} sx={{ textTransform: "capitalize" }}>
-          {status === "pending" ? "unpaid" : status}
+          {status}
         </Label>
       </TableCell>
 
