@@ -84,9 +84,9 @@ export default function MemberForm({ isEdit, currentData }) {
 
     try {
       if (!isEdit) {
-        await axiosApi.post(`/members`, data);
+        await axiosApi.post(`/member`, data);
       } else {
-        await axiosApi.patch(`/members/${currentData._id}`, data);
+        await axiosApi.patch(`/member/${currentData._id}`, data);
       }
 
       reset();

@@ -11,6 +11,7 @@ import {
   TableRow,
   TableCell,
   Link,
+  Typography,
   MenuItem,
 } from '@mui/material';
 import { TableMoreMenu } from '../../../components/table';
@@ -20,7 +21,7 @@ import Iconify from '../../../components/Iconify';
 // hooks
 import useAuth from '../../../hooks/useAuth';
 // utils
-import { formatDate2 } from '../../../utils/getData';
+import { formatDate, formatDate2 } from '../../../utils/getData';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 
@@ -28,8 +29,10 @@ import { PATH_DASHBOARD } from '../../../routes/paths';
 
 TenantTableRow.propTypes = {
   row: PropTypes.object,
-  onEditRow: PropTypes.func,
+  onDetailRow: PropTypes.func,
   onDeleteRow: PropTypes.func,
+  onActivateRow: PropTypes.func,
+  onSuspendRow: PropTypes.func,
 };
 
 const CustomTableRow = styled(TableRow)(() => ({
@@ -39,7 +42,7 @@ const CustomTableRow = styled(TableRow)(() => ({
   },
 }));
 
-export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
+export default function TenantTableRow({ row, onDetailRow, onDeleteRow, onActivateRow, onSuspendRow }) {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -136,7 +139,12 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
         </Label>
       </TableCell> */}
 
-      <TableCell align="center">{subsRef?.serviceRef?.name || '-'}</TableCell>
+      <TableCell align="center">
+        <Stack direction="column" alignItems="center" justifyContent="center">
+          {subsRef?.serviceRef?.name || 'TRIAL'}
+          <Typography variant="caption">Expiry : {subsRef?.endDate ? formatDate(subsRef?.endDate) : '-'}</Typography>
+        </Stack>
+      </TableCell>
 
       <TableCell align="center">
         <Label
@@ -157,23 +165,28 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
             <>
               <MenuItem
                 onClick={() => {
-                  // onEditRow();
+                  onDetailRow();
                   handleCloseAction();
                 }}
               >
-                <Iconify icon="eva:edit-outline" sx={{ width: 24, height: 24 }} />
+                <Iconify icon="fluent:apps-list-detail-24-regular" sx={{ width: 24, height: 24 }} />
                 Detail
               </MenuItem>
-              <MenuItem
-                sx={{ color: isActive(subsRef?.status) ? '#B78103' : '#229A16' }}
+              {/* <MenuItem
+                sx={{ color: isActive(status) ? '#B78103' : '#229A16' }}
                 onClick={() => {
+                  if (isActive(status)) {
+                    onSuspendRow();
+                  } else {
+                    onActivateRow();
+                  }
                   handleCloseAction();
                 }}
               >
                 <Iconify icon="typcn:warning-outline" sx={{ width: 24, height: 24 }} />
-                {isActive(subsRef?.status) ? 'Non-Aktifkan' : 'Aktifkan'}
-              </MenuItem>
-              {/* {user?.role === 'super admin' && (
+                {isActive(status) ? 'Non-Aktifkan' : 'Aktifkan'}
+              </MenuItem> */}
+              {user?.role === 'super admin' && (
                 <MenuItem
                   sx={{ color: 'red' }}
                   onClick={() => {
@@ -184,33 +197,10 @@ export default function TenantTableRow({ row, onEditRow, onDeleteRow }) {
                   <Iconify icon="eva:trash-2-outline" sx={{ width: 24, height: 24 }} />
                   Delete
                 </MenuItem>
-              )} */}
+              )}
             </>
           }
         />
-        {/* <Stack direction="row" justifyContent="center" gap={1}>
-          <Button
-            title="Edit"
-            variant="contained"
-            sx={{ p: 0, minWidth: 35, height: 35 }}
-            onClick={() => {
-              onEditRow();
-            }}
-          >
-            <Iconify icon="eva:edit-outline" sx={{ width: 24, height: 24 }} />
-          </Button>
-          <Button
-            title="Delete"
-            variant="contained"
-            color="error"
-            sx={{ p: 0, minWidth: 35, height: 35 }}
-            onClick={() => {
-              onDeleteRow();
-            }}
-          >
-            <Iconify icon="eva:trash-2-outline" sx={{ width: 24, height: 24 }} />
-          </Button>
-        </Stack> */}
       </TableCell>
     </CustomTableRow>
   );

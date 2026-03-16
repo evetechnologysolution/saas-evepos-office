@@ -26,7 +26,7 @@ export default function ChatWindow() {
   const handleSendMessage = async (value) => {
     setLoadingSend(true);
     try {
-      const res = await axios.post("/messages/send", value);
+      const res = await axios.post("/message/send", value);
       if (res.status === 200) {
         client.invalidateQueries("listMessages");
         client.invalidateQueries("listConversations");
@@ -42,7 +42,7 @@ export default function ChatWindow() {
   useEffect(() => {
     if (id) {
       const updateStatus = async () => {
-        const res = await axios.patch(`/messages/admin/read/${id}`);
+        const res = await axios.patch(`/message/admin/read/${id}`);
         if (res.status === 200) {
           client.invalidateQueries("listConversations");
           client.invalidateQueries("allNotif");
@@ -59,7 +59,7 @@ export default function ChatWindow() {
   });
 
   const getData = async ({ pageParam = 1 }) => {
-    const res = await axios.get(`/messages/member/${id}`, {
+    const res = await axios.get(`/message/member/${id}`, {
       params: {
         page: pageParam,
         perPage: controller.rowsPerPage,
@@ -91,7 +91,7 @@ export default function ChatWindow() {
     const [, id, params] = queryKey; // Extract query params
     const queryString = new URLSearchParams(params).toString(); // Build query string
     try {
-      const res = await axios.get(`/members/${id}?${queryString}`);
+      const res = await axios.get(`/member/${id}?${queryString}`);
       return res.data;
     } catch (error) {
       console.error("Error fetching data:", error);

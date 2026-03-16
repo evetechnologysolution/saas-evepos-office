@@ -6,6 +6,8 @@ import axios from 'src/utils/axios';
 export default function useCall() {
   const queryClient = useQueryClient();
   const queryKey = ['listTenant'];
+  const queryKeyInv = ['listTenantInvoice'];
+  const queryKeyLog = ['listTenantLog'];
 
   const list = (params) =>
     useQuery({
@@ -13,6 +15,28 @@ export default function useCall() {
       queryFn: async () => {
         const qs = new URLSearchParams(params).toString();
         const { data } = await axios.get(`/tenant?${qs}`);
+        return data;
+      },
+      keepPreviousData: false,
+    });
+
+  const listInvoice = (params) =>
+    useQuery({
+      queryKey: [...queryKeyInv, params],
+      queryFn: async () => {
+        const qs = new URLSearchParams(params).toString();
+        const { data } = await axios.get(`/invoice?${qs}`);
+        return data;
+      },
+      keepPreviousData: false,
+    });
+
+  const listActivity = (params) =>
+    useQuery({
+      queryKey: [...queryKeyLog, params],
+      queryFn: async () => {
+        const qs = new URLSearchParams(params).toString();
+        const { data } = await axios.get(`/tenant-log?${qs}`);
         return data;
       },
       keepPreviousData: false,
@@ -58,12 +82,36 @@ export default function useCall() {
     },
   });
 
+  const activate = useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const { data } = await axios.patch(`/tenant/activate/${id}`, payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(queryKey);
+    },
+  });
+
+  const suspend = useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const { data } = await axios.patch(`/tenant/suspend/${id}`, payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(queryKey);
+    },
+  });
+
   return {
     list,
+    listInvoice,
+    listActivity,
     getById,
     create,
     update,
     remove,
+    activate,
+    suspend,
     queryKey,
   };
 }

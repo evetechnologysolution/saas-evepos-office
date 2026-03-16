@@ -210,9 +210,9 @@ export default function VoucherForm({ currentData, isEdit }) {
       }
 
       if (!isEdit) {
-        await axios.post("/vouchers", formData);
+        await axios.post("/voucher", formData);
       } else {
-        await axios.patch(`/vouchers/${currentData._id}`, formData);
+        await axios.patch(`/voucher/${currentData._id}`, formData);
       }
       reset();
       enqueueSnackbar(!isEdit ? "Create success!" : "Update success!");

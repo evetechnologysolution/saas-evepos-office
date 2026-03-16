@@ -18,14 +18,14 @@ const CustomTableRow = styled(TableRow)(() => ({
 
 export default function OrderTableRow({ row }) {
 
-  const { date, paymentDate, orderId, orderType, status, billedAmount } = row;
+  const { createdAt, paymentDate, orderId, orderType, status, billedAmount } = row;
 
   let statusColor;
   if (status?.toLowerCase() === "paid") {
     statusColor = "success";
   } else if (status?.toLowerCase() === "half paid") {
     statusColor = "secondary";
-  } else if (status?.toLowerCase() === "pending") {
+  } else if (status?.toLowerCase() === "unpaid") {
     statusColor = "warning";
   } else if (status?.toLowerCase() === "refund") {
     statusColor = "default";
@@ -35,7 +35,7 @@ export default function OrderTableRow({ row }) {
 
   return (
     <CustomTableRow hover>
-      <TableCell align="center">{formatDate2(date)}</TableCell>
+      <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
       <TableCell align="center">{paymentDate ? formatDate2(paymentDate) : "-"}</TableCell>
 
@@ -49,7 +49,7 @@ export default function OrderTableRow({ row }) {
 
       <TableCell align="center">
         <Label variant="ghost" color={statusColor} sx={{ textTransform: "capitalize" }}>
-          {status === "pending" ? "unpaid" : status}
+          {status}
         </Label>
       </TableCell>
 

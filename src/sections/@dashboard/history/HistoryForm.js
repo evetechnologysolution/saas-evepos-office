@@ -112,7 +112,7 @@ export default function HistoryForm() {
       setLoading(true);
       setAlert(false);
 
-      const res = await axios.get("/members/track", {
+      const res = await axios.get("/member/track", {
         params: { search }
       });
 
@@ -148,7 +148,7 @@ export default function HistoryForm() {
   useEffect(() => {
     if (!data?.name) return; // Early return if member ID is not available
 
-    const url = `/orders?page=${controllerOrder.page + 1}&perPage=${controllerOrder.rowsPerPage}&search=${data.phone}`;
+    const url = `/order?page=${controllerOrder.page + 1}&perPage=${controllerOrder.rowsPerPage}&search=${data.phone}`;
     fetchData(url, setOrderData, setCountOrder);
   }, [controllerOrder, data]);
 
@@ -162,7 +162,7 @@ export default function HistoryForm() {
   useEffect(() => {
     if (!data?._id) return; // Early return if member ID is not available
 
-    const url = `/member-vouchers?page=${controllerVoucher.page + 1}&perPage=${controllerVoucher.rowsPerPage}&member=${data._id}`;
+    const url = `/member-voucher?page=${controllerVoucher.page + 1}&perPage=${controllerVoucher.rowsPerPage}&member=${data._id}`;
     fetchData(url, setVoucherData, setCountVoucher);
   }, [controllerVoucher, data]);
 

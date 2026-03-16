@@ -28,7 +28,7 @@ const CustomTableRow = styled(TableRow)(() => ({
 
 export default function ExpenseTableRow({ row, onDeleteRow }) {
 
-    const { date, code, description, amount } = row;
+    const { createdAt, code, description, amount } = row;
 
     const getExpense = (val) => {
         const expenseMap = {
@@ -49,7 +49,7 @@ export default function ExpenseTableRow({ row, onDeleteRow }) {
         <>
             <CustomTableRow hover>
 
-                <TableCell align="center">{formatDate2(date)}</TableCell>
+                <TableCell align="center">{formatDate2(createdAt)}</TableCell>
 
                 <TableCell>{getExpense(code)}</TableCell>
 

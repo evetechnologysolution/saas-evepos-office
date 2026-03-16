@@ -96,6 +96,43 @@ export default function Router() {
       children: [
         { element: <Navigate to="/dashboard/app" replace />, index: true },
         {
+          path: 'ticket',
+          children: [
+            {
+              path: '',
+              element: (
+                <RoleBasedGuard hasContent roles={['admin', 'super admin']}>
+                  <TicketList />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: 'new',
+              element: (
+                <RoleBasedGuard hasContent roles={['admin', 'super admin']}>
+                  <TicketCreate />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/edit',
+              element: (
+                <RoleBasedGuard hasContent roles={['admin', 'super admin']}>
+                  <TicketEdit />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/detail',
+              element: (
+                <RoleBasedGuard hasContent roles={['admin', 'super admin']}>
+                  <TicketDetail />
+                </RoleBasedGuard>
+              ),
+            },
+          ],
+        },
+        {
           path: 'app',
           element: (
             <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
@@ -104,12 +141,37 @@ export default function Router() {
           ),
         },
         {
+          path: 'plan',
+          element: <PlanList />,
+        },
+        {
+          path: 'plan/new',
+          element: <PlanCreate />,
+        },
+        {
+          path: 'plan/:id/edit',
+          element: <PlanEdit />,
+        },
+        {
           path: 'tenant',
-          element: (
-            <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
-              <TenantList />
-            </RoleBasedGuard>
-          ),
+          children: [
+            {
+              path: '',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
+                  <TenantList />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/detail',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin', 'admin']}>
+                  <TenantDetail />
+                </RoleBasedGuard>
+              ),
+            },
+          ],
         },
         {
           path: 'customer',
@@ -384,26 +446,21 @@ export default function Router() {
           ],
         },
         {
-          path: 'list/gallery',
-          children: [
-            {
-              path: '',
-              element: (
-                <RoleBasedGuard hasContent roles={['super admin']}>
-                  <Subscription />
-                </RoleBasedGuard>
-              ),
-            },
-          ],
-        },
-        {
           path: 'subscription',
           children: [
             {
               path: '',
               element: (
                 <RoleBasedGuard hasContent roles={['super admin']}>
-                  <Subscription />
+                  <SubscriptionList />
+                </RoleBasedGuard>
+              ),
+            },
+            {
+              path: ':id/detail',
+              element: (
+                <RoleBasedGuard hasContent roles={['super admin']}>
+                  <SubscriptionDetail />
                 </RoleBasedGuard>
               ),
             },
@@ -626,6 +683,8 @@ const NotFound = Loadable(lazy(() => import('../pages/Page404')));
 
 // Tenant
 const TenantList = Loadable(lazy(() => import('../pages/tenant/TenantList')));
+// const TenantDetail = Loadable(lazy(() => import('../pages/tenant/TenantDetail')));
+const TenantDetail = Loadable(lazy(() => import('../pages/tenant/tenantDetailV2/TenantDetail')));
 
 // Customer
 const CustomerList = Loadable(lazy(() => import('../pages/customer/CustomerList')));
@@ -672,7 +731,8 @@ const UserAccount = Loadable(lazy(() => import('../pages/UserAccount')));
 const UserProfile = Loadable(lazy(() => import('../pages/UserProfile')));
 
 // SUBSCRIPTION
-const Subscription = Loadable(lazy(() => import('../pages/subscription/Subscription')));
+const SubscriptionList = Loadable(lazy(() => import('../pages/subscription/SubscriptionList')));
+const SubscriptionDetail = Loadable(lazy(() => import('../pages/subscription/SubscriptionDetail')));
 
 // SETTINGS
 const Settings = Loadable(lazy(() => import('../pages/setting/general/Settings')));
@@ -697,3 +757,14 @@ const VoucherScan = Loadable(lazy(() => import('../pages/scanVoucher')));
 
 // Chat
 const ChatPage = Loadable(lazy(() => import('../pages/chat/Chat')));
+
+// Plan
+const PlanList = Loadable(lazy(() => import('../pages/plan/Plan')));
+const PlanCreate = Loadable(lazy(() => import('../pages/plan/PlanCreate')));
+const PlanEdit = Loadable(lazy(() => import('../pages/plan/PlanEdit')));
+
+// Ticket
+const TicketList = Loadable(lazy(() => import('../pages/ticket/List')));
+const TicketCreate = Loadable(lazy(() => import('../pages/ticket/Create')));
+const TicketEdit = Loadable(lazy(() => import('../pages/ticket/Edit')));
+const TicketDetail = Loadable(lazy(() => import('../pages/ticket/Detail')));

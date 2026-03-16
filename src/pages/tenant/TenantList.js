@@ -31,6 +31,7 @@ import Page from '../../components/Page';
 import Scrollbar from '../../components/Scrollbar';
 import { TableHeadCustom, TableLoading, TableNoData } from '../../components/table';
 import ConfirmDelete from '../../components/ConfirmDelete';
+import ConfirmDialog from '../../components/ConfirmDialog';
 // sections
 import { TenantTableToolbar, TenantTableRow } from './sections';
 // context
@@ -62,10 +63,12 @@ export default function TenantList() {
   const { themeStretch } = useSettings();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { list, remove } = useService();
+  const { list, remove, activate, suspend } = useService();
 
   const [selectedId, setSelectedId] = useState('');
   const [open, setOpen] = useState(false);
+  const [openActivate, setOpenActivate] = useState(false);
+  const [openSuspend, setOpenSuspend] = useState(false);
   const [filterRole, setFilterRole] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [search, setSearch] = useState('');
@@ -143,9 +146,23 @@ export default function TenantList() {
     navigate(PATH_DASHBOARD.tenant.edit(paramCase(id)));
   };
 
+  const handleDetailRow = (id) => {
+    navigate(PATH_DASHBOARD.tenant.detail(paramCase(id)));
+  };
+
   const handleDialog = (id) => {
     setSelectedId(id);
     setOpen(!open);
+  };
+
+  const handleDialogActivate = (id) => {
+    setSelectedId(id);
+    setOpenActivate(!openActivate);
+  };
+
+  const handleDialogSuspend = (id) => {
+    setSelectedId(id);
+    setOpenSuspend(!openSuspend);
   };
 
   const handleDelete = () => {
@@ -153,13 +170,47 @@ export default function TenantList() {
 
     remove.mutate(selectedId, {
       onSuccess: () => {
-        enqueueSnackbar('User deleted!', { variant: 'success' });
+        enqueueSnackbar('Tenant deleted!', { variant: 'success' });
         setOpen(false);
       },
       onError: (err) => {
         enqueueSnackbar(err?.message || 'Failed to delete', { variant: 'error' });
       },
     });
+  };
+
+  const handleActivate = () => {
+    if (!selectedId) return;
+
+    activate.mutate(
+      { id: selectedId, payload: {} },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Tenant activated!', { variant: 'success' });
+          setOpenActivate(false);
+        },
+        onError: (err) => {
+          enqueueSnackbar(err?.message || 'Failed to activate', { variant: 'error' });
+        },
+      }
+    );
+  };
+
+  const handleSuspend = () => {
+    if (!selectedId) return;
+
+    suspend.mutate(
+      { id: selectedId, payload: {} },
+      {
+        onSuccess: () => {
+          enqueueSnackbar('Tenant suspended!', { variant: 'success' });
+          setOpenSuspend(false);
+        },
+        onError: (err) => {
+          enqueueSnackbar(err?.message || 'Failed to suspend', { variant: 'error' });
+        },
+      }
+    );
   };
 
   return (
@@ -212,7 +263,10 @@ export default function TenantList() {
                             key={row._id}
                             row={row}
                             onEditRow={() => handleEditRow(row._id)}
+                            onDetailRow={() => handleDetailRow(row._id)}
                             onDeleteRow={() => handleDialog(row._id)}
+                            onActivateRow={() => handleDialogActivate(row._id)}
+                            onSuspendRow={() => handleDialogSuspend(row._id)}
                           />
                         ))}
 
@@ -230,7 +284,7 @@ export default function TenantList() {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={Number(tableData?.totalPages || 0)}
+                count={Number(tableData?.totalDocs || 0)}
                 rowsPerPage={controller.rowsPerPage}
                 page={controller.page}
                 onPageChange={handlePageChange}
@@ -246,7 +300,26 @@ export default function TenantList() {
           </Card>
         </Container>
       </Page>
+
       <ConfirmDelete open={open} onClose={handleDialog} onDelete={handleDelete} isLoading={remove.isLoading} />
+
+      <ConfirmDialog
+        open={openActivate}
+        onClick={handleActivate}
+        onClose={() => setOpenActivate(false)}
+        isLoading={activate?.isLoading}
+        title="Confirm Activate"
+        text="Are you sure want to activate this Tenant?"
+      />
+
+      <ConfirmDialog
+        open={openSuspend}
+        onClick={handleSuspend}
+        onClose={() => setOpenSuspend(false)}
+        isLoading={suspend?.isLoading}
+        title="Confirm Suspend"
+        text="Are you sure want to suspend this Tenant?"
+      />
     </>
   );
 }

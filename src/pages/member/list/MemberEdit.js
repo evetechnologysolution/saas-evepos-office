@@ -29,7 +29,7 @@ export default function MemberEdit() {
     useEffect(() => {
         const getData = async () => {
             try {
-                await axios.get(`/members/${id}`).then((response) => {
+                await axios.get(`/member/${id}`).then((response) => {
                     setCurrentData(response.data);
                 });
             } catch (error) {
