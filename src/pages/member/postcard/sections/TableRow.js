@@ -30,7 +30,7 @@ export default function LogVoucherTableRow({ row }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { _id, createdAt, name, option, member, isPrinted } = row;
+  const { _id, createdAt, name, option, memberRef, isPrinted } = row;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -143,7 +143,7 @@ export default function LogVoucherTableRow({ row }) {
         y: 160,
         color: '#fff',
         gap: 70,
-        texts: [`Full Name : ${member.name}`, `Evewash ID : ${member.memberId}`],
+        texts: [`Full Name : ${memberRef?.name}`, `Evewash ID : ${memberRef?.memberId}`],
       },
       qr: { x: 900, y: 500 },
     },
@@ -153,7 +153,7 @@ export default function LogVoucherTableRow({ row }) {
         y: 210,
         bg: 'rgba(0,0,0,0.1)',
         gap: 70,
-        texts: [`Full Name : ${member.name}`, `Evewash ID : ${member.memberId}`],
+        texts: [`Full Name : ${memberRef?.name}`, `Evewash ID : ${memberRef?.memberId}`],
       },
       qr: { x: 910, y: 490 },
     },
@@ -164,7 +164,7 @@ export default function LogVoucherTableRow({ row }) {
         color: '#000',
         bg: 'rgba(255,255,255,0.5)',
         gap: 70,
-        texts: [`Full Name : ${member.name}`, `Evewash ID : ${member.memberId}`],
+        texts: [`Full Name : ${memberRef?.name}`, `Evewash ID : ${memberRef?.memberId}`],
       },
       qr: { x: 80, y: 500 },
     },
@@ -176,7 +176,7 @@ export default function LogVoucherTableRow({ row }) {
         center: true,
         font: 'bold 28px Poppins, Arial',
         gap: 40,
-        texts: [`Full Name : ${member.name}`, `Evewash ID : ${member.memberId}`],
+        texts: [`Full Name : ${memberRef?.name}`, `Evewash ID : ${memberRef?.memberId}`],
       },
       qr: { x: 920, y: 530 },
     },
@@ -186,7 +186,7 @@ export default function LogVoucherTableRow({ row }) {
         y: 450,
         color: '#40494B',
         gap: 40,
-        texts: ['Full Name :', member.name],
+        texts: ['Full Name :', memberRef?.name],
         fonts: ['28px Poppins, Arial', 'Bold 36px Poppins, Arial'],
       },
       qr: { x: 60, y: 510 },
@@ -213,19 +213,19 @@ export default function LogVoucherTableRow({ row }) {
       ctx.fillStyle = '#40494B';
       ctx.font = 'bold 20px Poppins, Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(member.memberId, cfg.qr.x + 110, cfg.qr.y + 250);
+      ctx.fillText(memberRef?.memberId, cfg.qr.x + 110, cfg.qr.y + 250);
     }
   };
 
   const handleDownload = async () => {
-    if (!member?.memberId) return;
+    if (!memberRef?.memberId) return;
     setIsLoading(true);
 
     const bgSrc = bgMap[option] || bgMap['opsi 1'];
 
     try {
       // Generate QR (PASTI siap)
-      const qrCodeUrl = await QRCode.toDataURL(member.memberId, {
+      const qrCodeUrl = await QRCode.toDataURL(memberRef?.memberId, {
         scale: 10,
         margin: 1,
         errorCorrectionLevel: 'H',
@@ -249,7 +249,7 @@ export default function LogVoucherTableRow({ row }) {
 
       // Download
       const link = document.createElement('a');
-      link.download = `postcard-${member.memberId}.png`;
+      link.download = `postcard-${memberRef?.memberId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
 
@@ -275,12 +275,12 @@ export default function LogVoucherTableRow({ row }) {
 
       <TableCell>{name}</TableCell>
 
-      <TableCell>{member.memberId}</TableCell>
+      <TableCell>{memberRef?.memberId}</TableCell>
 
-      <TableCell>{member.name}</TableCell>
+      <TableCell>{memberRef?.name}</TableCell>
 
       <TableCell>
-        {!member?.phone?.includes('EM') ? maskedPhone(user.role === 'Super Admin', member?.phone) : '-'}
+        {!memberRef?.phone?.includes('EM') ? maskedPhone(user.role === 'Super Admin', memberRef?.phone) : '-'}
       </TableCell>
 
       <TableCell align="center">
