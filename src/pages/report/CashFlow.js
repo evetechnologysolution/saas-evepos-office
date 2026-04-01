@@ -44,12 +44,12 @@ export default function CashFlow() {
 
     useEffect(() => {
         const tCashIn = data?.cashIn || 0;
-        const tCashOut = (data?.cashOt || 0) + (data?.refund || 0) + (data?.totalExpense || 0);
+        const tCashOut = (data?.refund || 0) + (data?.totalExpense || 0);
         const tSales = data?.sales || 0;
         const tCashFlow = tSales - tCashOut;
         const tAmount = tCashIn + tCashFlow;
 
-        setTotalCashIn(tCashIn);
+        setTotalCashIn(tCashIn - tSales);
         setTotalSales(tSales);
         setTotalCashOut(tCashOut);
         setTotalCashFlow(tCashFlow);
